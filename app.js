@@ -3,13 +3,18 @@
 */
 'use strict'
 
+let appInsights = require('applicationinsights');
 const express = require('express')
 const bodyParser = require('body-parser');
 const hbs = require('express-handlebars')
 const app = express()
 const api = require ('./routes')
 const path = require('path')
+const config = require('./config')
 //CORS middleware
+
+appInsights.setup(config.APPINSIGHTS_INSTRUMENTATIONKEY);
+appInsights.start();
 
 function setCrossDomain(req, res, next) {
   //instead of * you can define ONLY the sources that we allow.

@@ -21,5 +21,6 @@ module.exports = {
     sasToken: undefined,
     accountBlobName: 'blobgenomics',
     keyAzureBlob: 'lXaW8+GnmQuHYVku3GWEjZnRhi9hv5u7v2kGvRiUQR6/PTlJuIZT+hyf+nUgLGTSpIToheyZ7oXyX34+q3s63g=='
-  }
+  },
+  APPINSIGHTS_INSTRUMENTATIONKEY:'undefined' //APPINSIGHTS KEY AZURE
 }
