@@ -1,12 +1,219 @@
 [
   {
     "type": "post",
-    "url": "https://health29.org/api/api/signin",
+    "url": "https://health29.org/api/signin/registerUserInAuthy",
+    "title": "Register in Authy: old users",
+    "name": "Register_in_Authy",
+    "version": "1.0.0",
+    "group": "Access_token",
+    "description": "<p>This method gets the response about update the phone information of the user and the registration in Authy application. An email will be sent to indicate the next steps for the user.</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": " var passwordsha512 = sha512(\"fjie76?vDh\"); \t\t\n var param={email:\"aa@aa.com\", password:passwordsha512, countryselectedPhoneCode:\"+34\",phone:\"66666666\",device:{id:this.deviceId,info:this.deviceInformation}};\n this.http.post('https://health29.org/api/signin/registerUserInAuthy',params)\n .subscribe( (res : any) => {\n\t\tif(res.message==\"User Registered in Authy\"){\n\t    \t// User registration OK\n\t\t}\n\t\telse{\n\t\t\t// User registration KO\n\t\t}\n });",
+        "type": "js"
+      },
+      {
+        "title": "Obtain device id and information.",
+        "content": " // DeviceID:\n if(localStorage.getItem('deviceid')){\n \tthis.deviceId=localStorage.getItem('deviceid')\n }else{\n \tthis.deviceId = sha512(Math.random().toString(36).substr(2, 9));\n \tlocalStorage.setItem('deviceid', this.deviceId)\n }\n // Device information:\n\tsetTimeout(() =>{\n\t\tFingerprint2.get((components:any) => {\n\t\t\tconsole.log(components)\n\t\t\tvar timezone=\"\";\n\t\t\tvar platform=\"\";\n\t\t\tvar userAgent=\"\";\n\t\t\tfor(var i=0;i<components.length;i++){\n\t\t\t\tif(components[i].key==\"timezone\"){\n\t\t\t\t\ttimezone=components[i].value;\n\t\t\t\t}\n\t\t\t\telse if(components[i].key==\"platform\"){\n\t\t\t\t\tplatform=components[i].value;\n\t\t\t\t}\n\t \t\t\telse if(components[i].key==\"userAgent\"){\n\t\t\t\t\tuserAgent=components[i].value;\n\t\t\t\t}\n\t\t\t}\n\t\t\tthis.deviceInformation={timezone:timezone,platform:platform,userAgent:userAgent}\n\t\t})\n\t}, 500)",
+        "type": "js"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "body": [
+          {
+            "group": "body",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>User email.</p>"
+          },
+          {
+            "group": "body",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>User password using hash <a href=\"https://es.wikipedia.org/wiki/SHA-2\" target=\"_blank\">sha512</a></p>"
+          },
+          {
+            "group": "body",
+            "type": "String",
+            "optional": false,
+            "field": "phone",
+            "description": "<p>The phone number</p>"
+          },
+          {
+            "group": "body",
+            "type": "String",
+            "optional": false,
+            "field": "countryselectedPhoneCode",
+            "description": "<p>The country code</p>"
+          },
+          {
+            "group": "body",
+            "type": "Object",
+            "optional": false,
+            "field": "device",
+            "description": "<p>A json object with information about device id, timezone, platform and userAgent.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\t\t{\n\t\t\t\"email\":\"aa@aa.com\",\n \t\t\"password\":passwordsha512,\n\t\t\t\"countryselectedPhoneCode\":\"+34\",\n\t\t\t\"phone\":\"666666666\",\n\t\t\t\"device\":{\n\t\t\t\t\"id\":\"1234\",\n\t\t\t\t\"info\": {\n\t\t\t\t\t\"timezone\":\"Europe/Madrid\",\n\t\t\t\t\t\"platform\":\"Win32\",\n\t\t\t\t\t\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36\"\n\t\t\t\t}\n\t\t\t}\n\t\t}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>If all goes well, the system should return &quot;User Registered in Authy&quot; and the token.</p>"
+          }
+        ],
+        "Failed 500": [
+          {
+            "group": "Failed 500",
+            "type": "String",
+            "optional": false,
+            "field": "string",
+            "description": "<p>Information about the request was failed: <ul> Error finding the user </ul> <ul> User not found </ul> <ul> Error finding the group </ul> <ul> Group not found </ul> <ul> Error registering the user in Authy </ul> <ul> Error updating the user </ul> <ul> Fail sending email </ul></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n \"message\": \"User Registered in Authy\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "controllers/all/user.js",
+    "groupTitle": "Access_token"
+  },
+  {
+    "type": "post",
+    "url": "https://health29.org/api/api/signin2FA/",
+    "title": "Get the token with 2FA",
+    "name": "Request_approval",
+    "version": "1.0.0",
+    "group": "Access_token",
+    "description": "<p>This method gets the token and the language for the user with 2FA. This token includes the encrypt id of the user, token expiration date, role, and the group to which it belongs. The token are encoded using <a href=\"https://en.wikipedia.org/wiki/JSON_Web_Token\" target=\"_blank\">jwt</a> <br> <br> We use the <a href=\"https://www.npmjs.com/package/fingerprintjs2\" target=\"_blank\">fingerprintjs2 library</a> for configuring the params.</p>",
+    "examples": [
+      {
+        "title": "Example usage",
+        "content": " var passwordsha512 = sha512(\"fjie76?vDh\");\n var body={\n\t\t\"email\":\"aa@aa.com\",\n\t\t\"password\":passwordsha512,\n\t\t\"deviceInformation\":{\n\t\t\t\"timezone\":\"Europe/Madrid\",\n\t\t\t\"platform\":\"Win32\",\n\t\t\t\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36\"\n\t\t },\n\t\t\"deviceId\":\"1234\"};\n\n this.http.post('https://health29.org/api/signin2FA/',body)\n .subscribe( (res : any) => {\n\t\tif(res.type==\"2FA approved\"){\n\t\t\t// In this case the application has been correctly sent to Authy. Now, to continue, you must use the status2FA method described in \"SignIn 2FA\" section to check the user's response.\n\t\t\t// The login is not yet complete since Authy authorization is required by the user.\n\t\t}\n\t\telse{\n\t\t\tthis.isloggedIn = false;\n\t\t}\n });",
+        "type": "js"
+      },
+      {
+        "title": "Obtain device id and information.",
+        "content": " // DeviceID:\n if(localStorage.getItem('deviceid')){\n \tthis.deviceId=localStorage.getItem('deviceid')\n }else{\n \tthis.deviceId = sha512(Math.random().toString(36).substr(2, 9));\n \tlocalStorage.setItem('deviceid', this.deviceId)\n }\n // Device information:\n\tsetTimeout(() =>{\n\t\tFingerprint2.get((components:any) => {\n\t\t\tconsole.log(components)\n\t\t\tvar timezone=\"\";\n\t\t\tvar platform=\"\";\n\t\t\tvar userAgent=\"\";\n\t\t\tfor(var i=0;i<components.length;i++){\n\t\t\t\tif(components[i].key==\"timezone\"){\n\t\t\t\t\ttimezone=components[i].value;\n\t\t\t\t}\n\t\t\t\telse if(components[i].key==\"platform\"){\n\t\t\t\t\tplatform=components[i].value;\n\t\t\t\t}\n\t \t\t\telse if(components[i].key==\"userAgent\"){\n\t\t\t\t\tuserAgent=components[i].value;\n\t\t\t\t}\n\t\t\t}\n\t\t\tthis.deviceInformation={timezone:timezone,platform:platform,userAgent:userAgent}\n\t\t})\n\t}, 500)",
+        "type": "js"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "body": [
+          {
+            "group": "body",
+            "type": "string",
+            "optional": false,
+            "field": "email",
+            "description": "<p>User email.</p>"
+          },
+          {
+            "group": "body",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": "<p>User password using hash <a href=\"https://es.wikipedia.org/wiki/SHA-2\" target=\"_blank\">sha512</a></p>"
+          },
+          {
+            "group": "body",
+            "type": "Object",
+            "optional": false,
+            "field": "deviceInformation",
+            "description": "<p>timezone, platform and user Agent of the user device.</p>"
+          },
+          {
+            "group": "body",
+            "type": "String",
+            "optional": false,
+            "field": "deviceId",
+            "description": "<p>The unique identifier of the device.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n\t\"email\":\"aa@aa.com\",\n\t\"password\":passwordsha512,\n\t\"deviceInformation\":{\n\t\t\"timezone\":\"Europe/Madrid\",\n\t\t\"platform\":\"Win32\",\n\t\t\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36\"\n \t},\n\t\"deviceId\":\"1234\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<ul> If the request is approved by the user: \"You have successfully logged in\" </ul> <ul> If the request is denied by the user \"Authentication denied\" </ul>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "token",
+            "description": "<ul> If the request is approved by the user - the unique token for the user access to Health29 </ul> <ul> If the request is denied by the user: null </ul>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "lang",
+            "description": "<ul> If the request is approved by the user - Lang of the User. </ul> <ul> If the request is denied by the user: null </ul>"
+          }
+        ],
+        "Failed 500": [
+          {
+            "group": "Failed 500",
+            "type": "Object",
+            "optional": false,
+            "field": "json",
+            "description": "<p>Some errors could return 500 error (specified in message field of the object result) <ul> {message: &quot;Bad Request sending approval&quot;} </ul> <ul> {message: &quot;Bad Request for checking approval status&quot;} </ul> <ul> {message: &quot;User not found&quot;} </ul></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200  OK\n{\n \"message\": \"You have successfully logged in\",\n \"token\": \"eyJ0eXAiOiJKV1QiLCJhbGciPgDIUzI1NiJ9.eyJzdWIiOiI1M2ZlYWQ3YjY1YjM0ZTQ0MGE4YzRhNmUyMzVhNDFjNjEyOThiMWZjYTZjMjXkZTUxMTA9OGVkN2NlODMxYWY3IiwiaWF0IjoxNTIwMzUzMDMwLCJlcHAiOjE1NTE4ODkwMzAsInJvbGUiOiJVc2VyIiwiZ3JvdDEiOiJEdWNoZW5uZSBQYXJlbnQgUHJfrmVjdCBOZXRoZXJsYW5kcyJ9.MloW8eeJ857FY7-vwxJaMDajFmmVStGDcnfHfGJx05k\",\n \"lang\": \"en\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "controllers/all/user.js",
+    "groupTitle": "Access_token"
+  },
+  {
+    "type": "post",
+    "url": "https://health29.org/api/signin",
     "title": "Get the token (and the userId)",
     "name": "signIn",
     "version": "1.0.0",
     "group": "Access_token",
-    "description": "<p>This method gets the token and the language for the user. This token includes the encrypt id of the user, token expiration date, role, and the group to which it belongs. The token are encoded using <a href=\"https://en.wikipedia.org/wiki/JSON_Web_Token\" target=\"_blank\">jwt</a> <br> <br> The functionality of this method is directly related to the second authentication factor. That is, you have to take into account if the user you want to perform the operation with belongs or not to a patient group that has configured the 2FA.According to this, the answers obtained will be different. In this case, you will have to use the methods: <a href=\"#api-SignIn_2FA-Request_approval\">requestApproval</a> and <a href=\"#api-SignIn_2FA-Update_phone\">updatePhone</a>. At the moment the only patient group that has the functionality of 2FA implemented is Duchenne Parent Project Netherlands. <br> <br> We use the <a href=\"https://www.npmjs.com/package/fingerprintjs2\" target=\"_blank\">fingerprintjs2 library</a> for configuring the params.</p>",
+    "description": "<p>This method gets the token and the language for the user. This token includes the encrypt id of the user, token expiration date, role, and the group to which it belongs. The token are encoded using <a href=\"https://en.wikipedia.org/wiki/JSON_Web_Token\" target=\"_blank\">jwt</a> <br> <br> The functionality of this method is directly related to the second authentication factor. That is, you have to take into account if the user you want to perform the operation with belongs or not to a patient group that has configured the 2FA.According to this, the answers obtained will be different. In this case, you will have to use the methods: <a href=\"#api-Access_token-Request_approval\">Get token 2FA</a> and <a href=\"#api-Access_token-Register_in_Authy\">Register in Authy</a>. At the moment the only patient group that has the functionality of 2FA implemented is Duchenne Parent Project Netherlands. <br> <br> We use the <a href=\"https://www.npmjs.com/package/fingerprintjs2\" target=\"_blank\">fingerprintjs2 library</a> for configuring the params.</p>",
     "examples": [
       {
         "title": "Example for general usage",
@@ -6712,372 +6919,6 @@
     },
     "filename": "controllers/user/patient/phenotype.js",
     "groupTitle": "Phenotype"
-  },
-  {
-    "type": "get",
-    "url": "https://health29.org/api/api/signin/status2FA",
-    "title": "Get status of Authy request",
-    "name": "Check_status_2FA",
-    "version": "1.0.0",
-    "group": "SignIn_2FA",
-    "description": "<p>This method gets status of the operation of send request of approval to Authy. <br> <br> You will have to use the function <a href=\"#api-SignIn_2FA-isLogged2FA\">Check 2FA login</a></p>",
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "// Obtain the deviceId previously:\n// if(localStorage.getItem('deviceid')){\n// \t\tthis.deviceId=localStorage.getItem('deviceid')\n// }else{\n// \t\tthis.deviceId = sha512(Math.random().toString(36).substr(2, 9));\n// \t\tlocalStorage.setItem('deviceid', this.deviceId)\n// }\n// The token variable is the one obtained after the call to requestApproval method\nemail=\"aa@aa.com\"\nvar params=token+\"-code-\"+email+\"-code-\"+this.deviceId;\nvar params=\"aa@aa.com\";\nthis.http.get('https://health29.org/api/signin/requestApproval/'+params)\n.subscribe( (res : any) => {\n\t\tif (res.status == 'approved') {\n\t\t\t// The user accept in Authy app. Use [isLogged2FA](#api-Access_token-signIn)  method described in \"Sign in -2FA\" section for continue.\n\t\t}\n\t\telse if(res.status == 'denied'){\n\t\t\tthis.isloggedIn = false;\n\t\t}\n});",
-        "type": "js"
-      }
-    ],
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "token",
-            "description": "<p>The token obtained after the call to RequestApproval method</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>User email</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "deviceId",
-            "description": "<p>The ID of the user device</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "json",
-            "optional": false,
-            "field": "status",
-            "description": "<p>{status:requestStatus} The request status could be:</p> <ul> <li>approved</li> <li>pending</li> <li>denied</li> </ul>"
-          }
-        ],
-        "Failed 400": [
-          {
-            "group": "Failed 400",
-            "type": "String",
-            "optional": false,
-            "field": "Information",
-            "description": "<p>about the request was failed: 'Bad Request.'</p>"
-          }
-        ],
-        "Failed 500": [
-          {
-            "group": "Failed 500",
-            "type": "json",
-            "optional": false,
-            "field": "Error",
-            "description": "<p>with the user. {message:'User not found'}</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n status:\"approved\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "controllers/all/user.js",
-    "groupTitle": "SignIn_2FA"
-  },
-  {
-    "type": "post",
-    "url": "https://health29.org/api/api/signin/requestApproval",
-    "title": "Request Authy approval",
-    "name": "Request_approval",
-    "version": "1.0.0",
-    "group": "SignIn_2FA",
-    "description": "<p>This method gets the token and the response for the request approval to Authy for a user. <br> <br> You will have to use the function <a href=\"#api-SignIn_2FA-Check_status_2FA\">Check status 2FA</a> <br> <br> We use the <a href=\"https://www.npmjs.com/package/fingerprintjs2\" target=\"_blank\">fingerprintjs2 library</a> for configuring the params.</p>",
-    "examples": [
-      {
-        "title": "Example usage",
-        "content": " var params=\"aa@aa.com\";\n this.http.post('https://health29.org/api/signin/requestApproval/'+params,this.deviceInformation)\n .subscribe( (res : any) => {\n\t\tif(res.type==\"2FA approved\"){\n\t\t\t// In this case the application has been correctly sent to Authy. Now, to continue, you must use the status2FA method described in \"SignIn 2FA\" section to check the user's response.\n\t\t\t// The login is not yet complete since Authy authorization is required by the user.\n\t\t}\n\t\telse{\n\t\t\tthis.isloggedIn = false;\n\t\t}\n });",
-        "type": "js"
-      },
-      {
-        "title": "Obtain device id and information.",
-        "content": " // DeviceID:\n if(localStorage.getItem('deviceid')){\n \tthis.deviceId=localStorage.getItem('deviceid')\n }else{\n \tthis.deviceId = sha512(Math.random().toString(36).substr(2, 9));\n \tlocalStorage.setItem('deviceid', this.deviceId)\n }\n // Device information:\n\tsetTimeout(() =>{\n\t\tFingerprint2.get((components:any) => {\n\t\t\tconsole.log(components)\n\t\t\tvar timezone=\"\";\n\t\t\tvar platform=\"\";\n\t\t\tvar userAgent=\"\";\n\t\t\tfor(var i=0;i<components.length;i++){\n\t\t\t\tif(components[i].key==\"timezone\"){\n\t\t\t\t\ttimezone=components[i].value;\n\t\t\t\t}\n\t\t\t\telse if(components[i].key==\"platform\"){\n\t\t\t\t\tplatform=components[i].value;\n\t\t\t\t}\n\t \t\t\telse if(components[i].key==\"userAgent\"){\n\t\t\t\t\tuserAgent=components[i].value;\n\t\t\t\t}\n\t\t\t}\n\t\t\tthis.deviceInformation={timezone:timezone,platform:platform,userAgent:userAgent}\n\t\t})\n\t}, 500)",
-        "type": "js"
-      }
-    ],
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>User email.</p>"
-          }
-        ],
-        "body": [
-          {
-            "group": "body",
-            "type": "json",
-            "optional": false,
-            "field": "device",
-            "description": "<p>Device information: timezone, platform and user Agent of the user device.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Request-Example:",
-          "content": "{\n\t\"timezone\":\"Europe/Madrid\",\n\t\"platform\":\"Win32\",\n\t\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>If all goes well, the system should return &quot;2FA approved&quot; and the token.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "type",
-            "description": "<p>The type param of the request indicate you if the request of send approval to authy is done correctly.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "token",
-            "description": "<p>You will need this <strong>token</strong> for review the request status from Authy.</p>"
-          }
-        ],
-        "Failed 400": [
-          {
-            "group": "Failed 400",
-            "type": "String",
-            "optional": false,
-            "field": "string",
-            "description": "<p>Information about the request was failed: Bad Request sending approval</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n \"type\": \"2FA approved\",\n \"token\": \"eyJ0eXAiOiJKV1QiLCJhbGciPgDIUzI1NiJ9.eyJzdWIiOiI1M2ZlYWQ3YjY1YjM0ZTQ0MGE4YzRhNmUyMzVhNDFjNjEyOThiMWZjYTZjMjXkZTUxMTA9OGVkN2NlODMxYWY3IiwiaWF0IjoxNTIwMzUzMDMwLCJlcHAiOjE1NTE4ODkwMzAsInJvbGUiOiJVc2VyIiwiZ3JvdDEiOiJEdWNoZW5uZSBQYXJlbnQgUHJfrmVjdCBOZXRoZXJsYW5kcyJ9.MloW8eeJ857FY7-vwxJaMDajFmmVStGDcnfHfGJx05k\",\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "controllers/all/user.js",
-    "groupTitle": "SignIn_2FA"
-  },
-  {
-    "type": "post",
-    "url": "https://health29.org/api/api/signin/requestApproval",
-    "title": "Update phone",
-    "name": "Update_phone",
-    "version": "1.0.0",
-    "group": "SignIn_2FA",
-    "description": "<p>This method gets the response about update the phone information of the user and the registration in Authy application. An email will be sent to indicate the next steps for the user.</p>",
-    "examples": [
-      {
-        "title": "Example usage",
-        "content": " var email=\"aa@aa.com\";\n var param={countryselectedPhoneCode:\"+34\",phone:\"66666666\",device:{id:this.deviceId,info:this.deviceInformation}};\n this.http.post('https://health29.org/api/signin/updatePhone/'+emain,params)\n .subscribe( (res : any) => {\n\t\tif(res.message==\"User Registered in Authy\"){\n\t    \t// User registration OK\n\t\t}\n\t\telse{\n\t\t\t// User registration KO\n\t\t}\n });",
-        "type": "js"
-      },
-      {
-        "title": "Obtain device id and information.",
-        "content": " // DeviceID:\n if(localStorage.getItem('deviceid')){\n \tthis.deviceId=localStorage.getItem('deviceid')\n }else{\n \tthis.deviceId = sha512(Math.random().toString(36).substr(2, 9));\n \tlocalStorage.setItem('deviceid', this.deviceId)\n }\n // Device information:\n\tsetTimeout(() =>{\n\t\tFingerprint2.get((components:any) => {\n\t\t\tconsole.log(components)\n\t\t\tvar timezone=\"\";\n\t\t\tvar platform=\"\";\n\t\t\tvar userAgent=\"\";\n\t\t\tfor(var i=0;i<components.length;i++){\n\t\t\t\tif(components[i].key==\"timezone\"){\n\t\t\t\t\ttimezone=components[i].value;\n\t\t\t\t}\n\t\t\t\telse if(components[i].key==\"platform\"){\n\t\t\t\t\tplatform=components[i].value;\n\t\t\t\t}\n\t \t\t\telse if(components[i].key==\"userAgent\"){\n\t\t\t\t\tuserAgent=components[i].value;\n\t\t\t\t}\n\t\t\t}\n\t\t\tthis.deviceInformation={timezone:timezone,platform:platform,userAgent:userAgent}\n\t\t})\n\t}, 500)",
-        "type": "js"
-      }
-    ],
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>User email.</p>"
-          }
-        ],
-        "body": [
-          {
-            "group": "body",
-            "type": "String",
-            "optional": false,
-            "field": "phone",
-            "description": "<p>The phone number</p>"
-          },
-          {
-            "group": "body",
-            "type": "String",
-            "optional": false,
-            "field": "countryselectedPhoneCode",
-            "description": "<p>The country code</p>"
-          },
-          {
-            "group": "body",
-            "type": "String",
-            "optional": false,
-            "field": "device",
-            "description": "<p>device information: timezone, platform and userAgent.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Request-Example:",
-          "content": "{\n\t\"countryselectedPhoneCode\":\"+34\",\n\t\"phone\":\"666666666\",\n\t\"device\":{\n\t\t\"timezone\":\"Europe/Madrid\",\n\t\t\"platform\":\"Win32\",\n\t\t\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36\"\n\t}\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>If all goes well, the system should return &quot;2FA approved&quot; and the token.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "type",
-            "description": "<p>The type param of the request indicate you if the request of send approval to authy is done correctly.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "token",
-            "description": "<p>You will need this <strong>token</strong> in the header of all requests to the API functions for Authy.</p>"
-          }
-        ],
-        "Failed 400": [
-          {
-            "group": "Failed 400",
-            "type": "String",
-            "optional": false,
-            "field": "string",
-            "description": "<p>Information about the request was failed: Bad Request sending approval</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n \"type\": \"2FA approved\",\n \"token\": \"eyJ0eXAiOiJKV1QiLCJhbGciPgDIUzI1NiJ9.eyJzdWIiOiI1M2ZlYWQ3YjY1YjM0ZTQ0MGE4YzRhNmUyMzVhNDFjNjEyOThiMWZjYTZjMjXkZTUxMTA9OGVkN2NlODMxYWY3IiwiaWF0IjoxNTIwMzUzMDMwLCJlcHAiOjE1NTE4ODkwMzAsInJvbGUiOiJVc2VyIiwiZ3JvdDEiOiJEdWNoZW5uZSBQYXJlbnQgUHJfrmVjdCBOZXRoZXJsYW5kcyJ9.MloW8eeJ857FY7-vwxJaMDajFmmVStGDcnfHfGJx05k\",\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "controllers/all/user.js",
-    "groupTitle": "SignIn_2FA"
-  },
-  {
-    "type": "post",
-    "url": "https://health29.org/api/api/signin/isLogged2FA",
-    "title": "Check 2FA login",
-    "name": "isLogged2FA",
-    "version": "1.0.0",
-    "group": "SignIn_2FA",
-    "description": "<p>This method gets the token and the language for the user. This token includes the encrypt id of the user, token expiration date, role, and the group to which it belongs. The token are encoded using <a href=\"https://en.wikipedia.org/wiki/JSON_Web_Token\" target=\"_blank\">jwt</a></p>",
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": " var passwordsha512 = sha512(\"fjie76?vDh\");\n var formValue = { email: email, password: passwordsha512 };\n  this.http.post('https://health29.org/api/signin/isLogged2FA/',formValue)\n.subscribe( (res : any) => {\n\t\tif(res.message == \"You have successfully logged in\"){\n\t\t\tconsole.log(res.lang);\n\t\t\tconsole.log(res.token);\n\t\t\tthis.isloggedIn = true;\n\t\t}\n\t\telse{\n\t\t\tthis.isloggedIn = false;\n\t\t}\n});",
-        "type": "js"
-      }
-    ],
-    "parameter": {
-      "fields": {
-        "body": [
-          {
-            "group": "body",
-            "type": "String",
-            "optional": false,
-            "field": "email",
-            "description": "<p>User email. In the link to request a change of password sent to the email, there is an email parameter. The value of this parameter will be the one to be assigned to email.</p>"
-          },
-          {
-            "group": "body",
-            "type": "String",
-            "optional": false,
-            "field": "password",
-            "description": "<p>User password using hash <a href=\"https://es.wikipedia.org/wiki/SHA-2\" target=\"_blank\">sha512</a></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Request-Example:",
-          "content": "{\n  \"email\": \"example@ex.com\",\n  \"password\": \"f74f2603939a53656948480ce71f1ce46457b6654fd22c61c1f2ccd3e2c96d1cd02d162b560c4beaf1ae45f4574571dc5cbc1ce040701c0b5c38457988aa00fe97f\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "message",
-            "description": "<p>If all goes well, the system should return 'You have successfully logged in'</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "token",
-            "description": "<p>You will need this <strong>token</strong> in the header of almost all requests to the API. Whenever the user wants to access a protected route or resource, the user agent should send the JWT, in the Authorization header using the Bearer schema.</p> <p>The data contained in the token are: encrypted <strong>userId</strong>, expiration token, group, and role. To decode them, you you must use some jwt decoder <a href=\"https://en.wikipedia.org/wiki/JSON_Web_Token\" target=\"_blank\">jwt</a>. There are multiple options to do it, for example for javascript: <a href=\"https://github.com/hokaccha/node-jwt-simple\" target=\"_blank\">Option 1</a> <a href=\"https://github.com/auth0/jwt-decode\" target=\"_blank\">Option 2</a> When you decode, you will see that it has several values, these are:</p> <p> <ul>  <li>sub: the encrypted userId. This value will also be used in many API queries. It is recommended to store only the token, and each time the userId is required, decode the token.</li>  <li>exp: The expiration time claim identifies the expiration time on or after which the JWT must not be accepted for processing.</li>  <li>group: Group to which the user belongs, if it does not have a group, it will be 'None'. </li>  <li>role: Role of the user. Normally it will be 'User'.</li> </ul> </p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "lang",
-            "description": "<p>Lang of the User.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n \"message\": \"You have successfully logged in\",\n \"token\": \"eyJ0eXAiOiJKV1QiLCJhbGciPgDIUzI1NiJ9.eyJzdWIiOiI1M2ZlYWQ3YjY1YjM0ZTQ0MGE4YzRhNmUyMzVhNDFjNjEyOThiMWZjYTZjMjXkZTUxMTA9OGVkN2NlODMxYWY3IiwiaWF0IjoxNTIwMzUzMDMwLCJlcHAiOjE1NTE4ODkwMzAsInJvbGUiOiJVc2VyIiwiZ3JvdDEiOiJEdWNoZW5uZSBQYXJlbnQgUHJfrmVjdCBOZXRoZXJsYW5kcyJ9.MloW8eeJ857FY7-vwxJaMDajFmmVStGDcnfHfGJx05k\",\n \"lang\": \"en\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "controllers/all/user.js",
-    "groupTitle": "SignIn_2FA"
   },
   {
     "type": "delete",
