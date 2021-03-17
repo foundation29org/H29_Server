@@ -1,0 +1,39 @@
+<script type="text/javascript">
+  let usersList = document.createElement('ul')
+
+  const myHeaders = new Headers();
+  myHeaders.append('authorization', `Bearer ${localStorage.token}`)
+
+  fetch('/api/users', {
+    method: 'GET',
+    headers: myHeaders
+  })
+  .then(res => res.json())
+  .then(data => {
+    data.users.map(user => {
+      let email = document.createTextNode('Email: '+user.email)
+      let name = document.createTextNode( 'Name: '+user.userName)
+      let role = document.createTextNode('Role: '+user.role)
+      let signupDate = document.createTextNode('Signup Date: '+user.signupDate)
+      let confirmed = document.createTextNode('Confirmed: '+user.confirmed)
+      let elem = document.createElement('li')
+      let p1 = document.createElement('p')
+      let p2 = document.createElement('p')
+      let p3 = document.createElement('p')
+      let p4 = document.createElement('p')
+      let p5 = document.createElement('p')
+      p1.appendChild(email)
+      elem.appendChild(p1)
+      p2.appendChild(name)
+      elem.appendChild(p2)
+      p3.appendChild(role)
+      elem.appendChild(p3)
+      p4.appendChild(signupDate)
+      elem.appendChild(p4)
+      p5.appendChild(confirmed)
+      elem.appendChild(p5)
+      usersList.appendChild(elem)
+    })
+    document.body.appendChild(usersList)
+  })
+</script>
