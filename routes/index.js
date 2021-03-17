@@ -57,8 +57,10 @@ const api = express.Router()
 //routes for login-logout
 api.post('/signup', userCtrl.signUp)
 api.post('/signin', userCtrl.signIn)
-api.post('/signin/registerUserInAuthy', userCtrl.registerUserInAuthy)
-api.post('/signin2FA', userCtrl.signin2FA)
+api.post('/signin/updatePhone/:email', userCtrl.registerUserInAuthy)
+api.post('/signin/requestApproval/:email', userCtrl.sendApprovalRequest)
+api.get('/signin/status2FA/:tokenAndEmailAndDeviceId', userCtrl.getStatus2FA)
+api.post('/signin/isLogged2FA/', userCtrl.isLogged2FA)
 
 // activarcuenta
 api.post('/activateuser', userCtrl.activateUser)
