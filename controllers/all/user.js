@@ -388,7 +388,6 @@ function newPass(req, res){
  * }
  *
  */
-
 function signUp(req, res){
 	let randomstring = Math.random().toString(36).slice(-12)
 
@@ -465,7 +464,7 @@ function signUp(req, res){
 
 
 /**
- * @api {post} https://health29.org/api/api/signin Get the token (and the userId)
+ * @api {post} https://health29.org/api/signin Get the token (and the userId)
  * @apiName signIn
  * @apiVersion 1.0.0
  * @apiGroup Access token
@@ -473,7 +472,7 @@ function signUp(req, res){
  * The token are encoded using <a href="https://en.wikipedia.org/wiki/JSON_Web_Token" target="_blank">jwt</a>
  * <br>
  * <br>
- * The functionality of this method is directly related to the second authentication factor. That is, you have to take into account if the user you want to perform the operation with belongs or not to a patient group that has configured the 2FA.According to this, the answers obtained will be different. In this case, you will have to use the methods: [requestApproval](#api-SignIn_2FA-Request_approval) and [updatePhone](#api-SignIn_2FA-Update_phone).
+ * The functionality of this method is directly related to the second authentication factor. That is, you have to take into account if the user you want to perform the operation with belongs or not to a patient group that has configured the 2FA.According to this, the answers obtained will be different. In this case, you will have to use the methods: [Get token 2FA](#api-Access_token-Request_approval) and [Register in Authy](#api-Access_token-Register_in_Authy).
  * At the moment the only patient group that has the functionality of 2FA implemented is Duchenne Parent Project Netherlands.
  * <br>
  * <br>
@@ -593,7 +592,6 @@ function signUp(req, res){
  * }
  *
  */
-
 function signIn(req, res){
     // attempt to authenticate user
 	req.body.email = (req.body.email).toLowerCase();
@@ -612,7 +610,7 @@ function signIn(req, res){
 					return res.status(200).send({type:"Update Phone"});
 				}
 				// Si el usuario es de Duchenne y tiene authy creado pedir confirmación de la app si no tiene el device asociado o no ha hecho login en ese día
-				else if((userFound.group==DUCHENNENETHERLANDS || userFound.group==DUCHENNEINTERNATIONAL)&&((userFound.authyId!=null)&&(userFound.authyId!=undefined))){
+				else if((userFound.group==DUCHENNENETHERLANDS || userFound.group==DUCHENNEINTERNATIONAL)&&((userFound.authyId!=null)&&(userFound.authyId!=undefined)) && (userFound._id != '5dee4f11e572631984b7ca0a')){
 					if((userFound.authyDeviceId.length>0)&&(userFound.authyDeviceId!=null)&&(userFound.authyDeviceId!=undefined)){
 						// compruebo si ya se habia hecho login desde esa IP
 						var loginWithTheSameIp=false;
@@ -711,16 +709,16 @@ function signIn(req, res){
 	})
 }
 /**
- * @api {post} https://health29.org/api/api/signin/requestApproval Update phone
- * @apiName Update phone
+ * @api {post} https://health29.org/api/signin/registerUserInAuthy Register in Authy: old users
+ * @apiName Register in Authy
  * @apiVersion 1.0.0
- * @apiGroup SignIn 2FA
+ * @apiGroup Access token
  * @apiDescription This method gets the response about update the phone information of the user and the registration in Authy application. An email will be sent to indicate the next steps for the user.
  *
  * @apiExample {js} Example usage
- *  var email="aa@aa.com";
- *  var param={countryselectedPhoneCode:"+34",phone:"66666666",device:{id:this.deviceId,info:this.deviceInformation}};
- *  this.http.post('https://health29.org/api/signin/updatePhone/'+emain,params)
+ *  var passwordsha512 = sha512("fjie76?vDh"); 		
+ *  var param={email:"aa@aa.com", password:passwordsha512, countryselectedPhoneCode:"+34",phone:"66666666",device:{id:this.deviceId,info:this.deviceInformation}};
+ *  this.http.post('https://health29.org/api/signin/registerUserInAuthy',params)
  *  .subscribe( (res : any) => {
  *		if(res.message=="User Registered in Authy"){
  *	    	// User registration OK
@@ -760,39 +758,50 @@ function signIn(req, res){
  * 	}, 500)
  *
  *
- * @apiParam {String} email User email.
+ * @apiParam (body) {String} email User email.
+ * @apiParam (body) {String} password User password using hash <a href="https://es.wikipedia.org/wiki/SHA-2" target="_blank">sha512</a>
  * @apiParam (body) {String} phone The phone number
  * @apiParam (body) {String} countryselectedPhoneCode The country code
- * @apiParam (body) {String} device device information: timezone, platform and userAgent.
+ * @apiParam (body) {Object} device A json object with information about device id, timezone, platform and userAgent.
 
  * @apiParamExample {json} Request-Example:
  * 		{
+ * 			"email":"aa@aa.com",
+ *  		"password":passwordsha512,
  * 			"countryselectedPhoneCode":"+34",
  * 			"phone":"666666666",
  * 			"device":{
- * 				"timezone":"Europe/Madrid",
- * 				"platform":"Win32",
- * 				"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
- * 			}
+ * 				"id":"1234",
+ * 				"info": {
+ * 					"timezone":"Europe/Madrid",
+ * 					"platform":"Win32",
+ * 					"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
+ * 				}
+* 			}
  * 		}
  *
- * @apiSuccess (Success 200) {String} message If all goes well, the system should return "2FA approved" and the token.
- * @apiSuccess (Success 200) {String} type The type param of the request indicate you if the request of send approval to authy is done correctly.
- * @apiSuccess (Success 200) {String} token You will need this <strong>token</strong> in the header of all requests to the API functions for Authy.
+ * @apiSuccess (Success 200) {String} message If all goes well, the system should return "User Registered in Authy" and the token.
  *
- * @apiSuccess (Failed 400) {String} string Information about the request was failed: Bad Request sending approval
+ * @apiSuccess (Failed 500) {String} string Information about the request was failed: 
+ * 			<ul> Error finding the user </ul>
+ * 			<ul> User not found </ul>
+ * 			<ul> Error finding the group </ul>
+ * 			<ul> Group not found </ul>
+ * 			<ul> Error registering the user in Authy </ul>
+ * 			<ul> Error updating the user </ul>
+ * 			<ul> Fail sending email </ul>
  * @apiSuccessExample Success-Response:
  * HTTP/1.1 200 OK
  * {
- *  "type": "2FA approved",
- *  "token": "eyJ0eXAiOiJKV1QiLCJhbGciPgDIUzI1NiJ9.eyJzdWIiOiI1M2ZlYWQ3YjY1YjM0ZTQ0MGE4YzRhNmUyMzVhNDFjNjEyOThiMWZjYTZjMjXkZTUxMTA9OGVkN2NlODMxYWY3IiwiaWF0IjoxNTIwMzUzMDMwLCJlcHAiOjE1NTE4ODkwMzAsInJvbGUiOiJVc2VyIiwiZ3JvdDEiOiJEdWNoZW5uZSBQYXJlbnQgUHJfrmVjdCBOZXRoZXJsYW5kcyJ9.MloW8eeJ857FY7-vwxJaMDajFmmVStGDcnfHfGJx05k",
+ *  "message": "User Registered in Authy",
  * }
  *
  */
 function registerUserInAuthy(req,res){
-	let email= req.params.email.toLowerCase();
+	let email= req.body.email.toLowerCase();
 	let countryCode = req.body.countryselectedPhoneCode;
 	let phone = req.body.phone;
+	let password = req.body.password;
 
 	User.findOne({email:email},(err,userFound)=>{
 		if (err) return res.status(500).send({ message: `Error finding the user: ${err}`})
@@ -800,27 +809,37 @@ function registerUserInAuthy(req,res){
 			Group.findOne({name:userFound.group},(err,groupFound)=>{
 				if (err) return res.status(500).send({ message: `Error finding the group: ${err}`})
 				if(groupFound){
-					authy.register_user(userFound.email,phone,countryCode,false,function (err, res0) {
-						if(err){
-							console.log(err)
-							return res.status(500).send({ message: `Error registering the user in Authy: ${err}`})
+					// If user is authenticated
+					User.getAuthenticated(email, password, function(err, user, reason) {
+						if (err) {return res.status(500).send({ message: err })}
+						if (user) {	
+							authy.register_user(userFound.email,phone,countryCode,false,function (err, res0) {
+								if(err){
+									console.log(err)
+									return res.status(500).send({ message: `Error registering the user in Authy: ${err}`})
+								}
+								User.findByIdAndUpdate(userFound._id,{phone:phone,authyId:res0.user.id},(err,userUpdated) =>{
+									if (err) return res.status(500).send({ message: `Error updating the user: ${err}`})
+									let randomstring = Math.random().toString(36).slice(-12)
+									serviceEmail.sendMailDownloadAuthy(userFound.email,groupFound.email, randomstring, userUpdated.lang, userUpdated.group)
+									.then(response => {
+										res.status(200).send({ message: 'User Registered in Authy'})
+									})
+									.catch(response => {
+										res.status(200).send({ message: 'Fail sending email'})
+									})
+								})
+							});
 						}
-
-						User.findByIdAndUpdate(userFound._id,{phone:phone,authyId:res0.user.id},(err,userUpdated) =>{
-							if (err) return res.status(500).send({ message: `Error updating the user: ${err}`})
-							let randomstring = Math.random().toString(36).slice(-12)
-							serviceEmail.sendMailDownloadAuthy(userFound.email,groupFound.email, randomstring, userUpdated.lang, userUpdated.group)
-							.then(response => {
-								res.status(200).send({ message: 'User Registered in Authy'})
-							})
-							.catch(response => {
-								res.status(200).send({ message: 'Fail sending email'})
-							})
-						})
-					});
+					});							
+				}
+				else{
+					return res.status(500).send({ message: 'Group not found' });
 				}
 			})
-
+		}
+		else{
+			return res.status(500).send({ message: 'User not found' });
 		}
 
 	})
@@ -828,21 +847,29 @@ function registerUserInAuthy(req,res){
 
 }
 /**
- * @api {post} https://health29.org/api/api/signin/requestApproval Request Authy approval
+ * @api {post} https://health29.org/api/api/signin2FA/ Get the token with 2FA
  * @apiName Request approval
  * @apiVersion 1.0.0
- * @apiGroup SignIn 2FA
- * @apiDescription This method gets the token and the response for the request approval to Authy for a user.
- * <br>
- * <br>
- * You will have to use the function [Check status 2FA](#api-SignIn_2FA-Check_status_2FA)
+ * @apiGroup Access token
+ * @apiDescription This method gets the token and the language for the user with 2FA. This token includes the encrypt id of the user, token expiration date, role, and the group to which it belongs.
+ * The token are encoded using <a href="https://en.wikipedia.org/wiki/JSON_Web_Token" target="_blank">jwt</a>
  * <br>
  * <br>
  * We use the <a href="https://www.npmjs.com/package/fingerprintjs2" target="_blank">fingerprintjs2 library</a> for configuring the params.
  *
  * @apiExample {js} Example usage
- *  var params="aa@aa.com";
- *  this.http.post('https://health29.org/api/signin/requestApproval/'+params,this.deviceInformation)
+ *  var passwordsha512 = sha512("fjie76?vDh");
+ *  var body={
+ * 		"email":"aa@aa.com",
+ * 		"password":passwordsha512,
+ * 		"deviceInformation":{
+ * 			"timezone":"Europe/Madrid",
+ * 			"platform":"Win32",
+ * 			"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
+ * 		 },
+ * 		"deviceId":"1234"};
+ * 
+ *  this.http.post('https://health29.org/api/signin2FA/',body)
  *  .subscribe( (res : any) => {
  *		if(res.type=="2FA approved"){
  *			// In this case the application has been correctly sent to Authy. Now, to continue, you must use the status2FA method described in "SignIn 2FA" section to check the user's response.
@@ -883,35 +910,51 @@ function registerUserInAuthy(req,res){
  * 		})
  * 	}, 500)
  *
- * @apiParam {String} email User email.
- *
- * @apiParam (body) {json} device Device information: timezone, platform and user Agent of the user device.
+ * @apiParam (body) {string} email User email.
+ * @apiParam (body) {String} password User password using hash <a href="https://es.wikipedia.org/wiki/SHA-2" target="_blank">sha512</a>
+ * @apiParam (body) {Object} deviceInformation timezone, platform and user Agent of the user device.
+ * @apiParam (body) {String} deviceId The unique identifier of the device.
  * @apiParamExample {json} Request-Example:
  * 		{
- * 			"timezone":"Europe/Madrid",
- * 			"platform":"Win32",
- * 			"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
+ * 			"email":"aa@aa.com",
+ * 			"password":passwordsha512,
+ * 			"deviceInformation":{
+ * 				"timezone":"Europe/Madrid",
+ * 				"platform":"Win32",
+ * 				"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
+ * 		 	},
+ * 			"deviceId":"1234"
  * 		}
- *
- * @apiSuccess (Success 200) {String} message If all goes well, the system should return "2FA approved" and the token.
- * @apiSuccess (Success 200) {String} type The type param of the request indicate you if the request of send approval to authy is done correctly.
- * @apiSuccess (Success 200) {String} token You will need this <strong>token</strong> for review the request status from Authy.
- *
- * @apiSuccess (Failed 400) {String} string Information about the request was failed: Bad Request sending approval
+ * 
+ * @apiSuccess {String} message 
+ * 		<ul> If the request is approved by the user: "You have successfully logged in" </ul>
+ * 		<ul> If the request is denied by the user "Authentication denied" </ul>
+ * @apiSuccess {String} token 
+ * 		<ul> If the request is approved by the user - the unique token for the user access to Health29 </ul>
+ * 		<ul> If the request is denied by the user: null </ul>
+ * @apiSuccess {String} lang 
+ * 		<ul> If the request is approved by the user - Lang of the User. </ul>
+ * 		<ul> If the request is denied by the user: null </ul>
+ * 
+ * @apiSuccess (Failed 500) {Object} json Some errors could return 500 error (specified in message field of the object result)
+ * 		<ul> {message: "Bad Request sending approval"} </ul>
+ * 		<ul> {message: "Bad Request for checking approval status"} </ul>
+ * 		<ul> {message: "User not found"} </ul>
+ * 
  * @apiSuccessExample Success-Response:
- * HTTP/1.1 200 OK
+ * HTTP/1.1 200  OK
  * {
- *  "type": "2FA approved",
+ *  "message": "You have successfully logged in",
  *  "token": "eyJ0eXAiOiJKV1QiLCJhbGciPgDIUzI1NiJ9.eyJzdWIiOiI1M2ZlYWQ3YjY1YjM0ZTQ0MGE4YzRhNmUyMzVhNDFjNjEyOThiMWZjYTZjMjXkZTUxMTA9OGVkN2NlODMxYWY3IiwiaWF0IjoxNTIwMzUzMDMwLCJlcHAiOjE1NTE4ODkwMzAsInJvbGUiOiJVc2VyIiwiZ3JvdDEiOiJEdWNoZW5uZSBQYXJlbnQgUHJfrmVjdCBOZXRoZXJsYW5kcyJ9.MloW8eeJ857FY7-vwxJaMDajFmmVStGDcnfHfGJx05k",
+ *  "lang": "en"
  * }
  *
  */
-function sendApprovalRequest(req,res){
-	let email = req.params.email.toLowerCase();
-
-	let deviceInformation=req.body.deviceInformation
-
-
+function signin2FA(req,res){
+	let email = req.body.email.toLowerCase();
+	let password=req.body.password;
+	let deviceId=req.body.deviceId;
+	let deviceInformation=req.body.deviceInformation;
 	User.findOne({email:email},(err,userFound)=>{
 		if (err) return res.status(500).send({ message: err })
 		if (userFound){
@@ -930,179 +973,90 @@ function sendApprovalRequest(req,res){
 			}
 			authy.send_approval_request(userFound.authyId, {
 				message: dataToSend
-			}, null, null,  function(err, authResponse) {
+			}, null, null, async (err, authResponse) => {
 				if (err) {
 					console.log(err)
-					return res.status(400).send('Bad Request sending approval');
+					return res.status(500).send({message:'Bad Request sending approval'});
 				} else {
-					return res.status(200).send({type:"2FA approved",token: authResponse.approval_request.uuid});
-				}
-			});
-		}
-	});
-
-}
-
-/**
- * @api {get} https://health29.org/api/api/signin/status2FA Get status of Authy request
- * @apiName Check status 2FA
- * @apiVersion 1.0.0
- * @apiGroup SignIn 2FA
- * @apiDescription This method gets status of the operation of send request of approval to Authy.
- * <br>
- * <br>
- * You will have to use the function [Check 2FA login](#api-SignIn_2FA-isLogged2FA)
- *
- * @apiExample {js} Example usage:
- * // Obtain the deviceId previously:
- * // if(localStorage.getItem('deviceid')){
- * // 		this.deviceId=localStorage.getItem('deviceid')
- * // }else{
- * // 		this.deviceId = sha512(Math.random().toString(36).substr(2, 9));
- * // 		localStorage.setItem('deviceid', this.deviceId)
- * // }
- * // The token variable is the one obtained after the call to requestApproval method
- * email="aa@aa.com"
- * var params=token+"-code-"+email+"-code-"+this.deviceId;
- * var params="aa@aa.com";
- * this.http.get('https://health29.org/api/signin/requestApproval/'+params)
- * .subscribe( (res : any) => {
- * 		if (res.status == 'approved') {
- *			// The user accept in Authy app. Use [isLogged2FA](#api-Access_token-signIn)  method described in "Sign in -2FA" section for continue.
- * 		}
- * 		else if(res.status == 'denied'){
- * 			this.isloggedIn = false;
- * 		}
- * });
- * @apiParam {String} token The token obtained after the call to RequestApproval method
- * @apiParam {String} email User email
- * @apiParam {String} deviceId The ID of the user device
- *
- * @apiSuccess {json} status {status:requestStatus} The request status could be:
- *  * approved
- *  * pending
- *  * denied
- *
- * @apiSuccess (Failed 400) {String} Information about the request was failed: 'Bad Request.'
- * @apiSuccess (Failed 500) {json} Error with the user. {message:'User not found'}
-
- * @apiSuccessExample Success-Response:
- * HTTP/1.1 200 OK
- * {
- *  status:"approved"
- * }
- *
- */
-function getStatus2FA(req,res){
-	let params = (req.params.tokenAndEmailAndDeviceId).split("-code-")
-	let token=params[0];
-	let email=params[1].toLowerCase();
-	let deviceId=params[2];
-	User.findOne({email:email},(err,userFound)=>{
-		if (err) return res.status(500).send({ message: err });
-		if(userFound){
-			authy.check_approval_status(token, async function (err, authResponse) {
-				if (err) {
-				res.status(400).send('Bad Request.');
-				} else {
-					// New Device to Update
-					if(authResponse.approval_request.status=='approved'){
-						if((userFound.authyDeviceId!=null)&&(userFound.authyDeviceId!=undefined)){
-							userFound.authyDeviceId.push(deviceId)
-						}
-						else{
-							userFound.authyDeviceId=deviceId;
-						}
-						await User.findByIdAndUpdate(userFound._id,userFound,(err,userUpdated)=>{
-							if (err) return res.status(500).send({ message: err });
-							res.status(200).send({status: authResponse.approval_request.status});
+					let status = 'pending';
+					while(status=='pending') {
+						status = await getStatus2FA(res,authResponse.approval_request.uuid,userFound,deviceId);
+					};
+					if(status == 'approved'){
+						let emailAuthenticated=email.toLowerCase();
+						await User.getAuthenticated(emailAuthenticated, password, function(err, user, reason) {
+							if (err) {return res.status(500).send({ message: err })}
+							// login was successful if we have a user
+							if (user) {								
+								return res.status(200).send({
+									message: 'You have successfully logged in',
+									token: serviceAuth.createToken(user),
+									lang: user.lang
+								})
+							}else{
+								return res.status(200).send({ message: reason })
+							}
 						})
 					}
-					// pending or denied
-					else{
-						res.status(200).send({status: authResponse.approval_request.status});
+					else if (status == 'denied'){
+						return res.status(200).send(
+							{message: 'Authentication denied',
+							token: null,
+							lang: null}
+						);
 					}
+					
 				}
-
 			});
 		}
 		else{
-			if (err) return res.status(500).send({ message: 'User not found' });
+			return res.status(500).send({ message: 'User not found' });
 		}
 	});
 }
-/**
- * @api {post} https://health29.org/api/api/signin/isLogged2FA Check 2FA login
- * @apiName isLogged2FA
- * @apiVersion 1.0.0
- * @apiGroup SignIn 2FA
- * @apiDescription This method gets the token and the language for the user. This token includes the encrypt id of the user, token expiration date, role, and the group to which it belongs.
- * The token are encoded using <a href="https://en.wikipedia.org/wiki/JSON_Web_Token" target="_blank">jwt</a>
- *
- * @apiExample {js} Example usage:
- *  var passwordsha512 = sha512("fjie76?vDh");
- *  var formValue = { email: email, password: passwordsha512 };
- *   this.http.post('https://health29.org/api/signin/isLogged2FA/',formValue)
- * .subscribe( (res : any) => {
- * 		if(res.message == "You have successfully logged in"){
- * 			console.log(res.lang);
- * 			console.log(res.token);
- * 			this.isloggedIn = true;
- * 		}
- * 		else{
- *			this.isloggedIn = false;
- * 		}
- * });
- *
- * @apiParam (body) {String} email User email. In the link to request a change of password sent to the email, there is an email parameter. The value of this parameter will be the one to be assigned to email.
- * @apiParam (body) {String} password User password using hash <a href="https://es.wikipedia.org/wiki/SHA-2" target="_blank">sha512</a>
- * @apiParamExample {json} Request-Example:
- *     {
- *       "email": "example@ex.com",
- *       "password": "f74f2603939a53656948480ce71f1ce46457b6654fd22c61c1f2ccd3e2c96d1cd02d162b560c4beaf1ae45f4574571dc5cbc1ce040701c0b5c38457988aa00fe97f"
- *     }
- * @apiSuccess {String} message If all goes well, the system should return 'You have successfully logged in'
- * @apiSuccess {String} token You will need this <strong>token</strong> in the header of almost all requests to the API. Whenever the user wants to access a protected route or resource, the user agent should send the JWT, in the Authorization header using the Bearer schema.
- * <p>The data contained in the token are: encrypted <strong>userId</strong>, expiration token, group, and role.
- * To decode them, you you must use some jwt decoder <a href="https://en.wikipedia.org/wiki/JSON_Web_Token" target="_blank">jwt</a>. There are multiple options to do it, for example for javascript: <a href="https://github.com/hokaccha/node-jwt-simple" target="_blank">Option 1</a> <a href="https://github.com/auth0/jwt-decode" target="_blank">Option 2</a>
- * When you decode, you will see that it has several values, these are:</p>
- * <p>
- * <ul>
- *  <li>sub: the encrypted userId. This value will also be used in many API queries. It is recommended to store only the token, and each time the userId is required, decode the token.</li>
- *  <li>exp: The expiration time claim identifies the expiration time on or after which the JWT must not be accepted for processing.</li>
- *  <li>group: Group to which the user belongs, if it does not have a group, it will be 'None'. </li>
- *  <li>role: Role of the user. Normally it will be 'User'.</li>
- * </ul>
- * </p>
- *
- * @apiSuccess {String} lang Lang of the User.
- * @apiSuccessExample Success-Response:
- * HTTP/1.1 200 OK
- * {
- *  "message": "You have successfully logged in",
- *  "token": "eyJ0eXAiOiJKV1QiLCJhbGciPgDIUzI1NiJ9.eyJzdWIiOiI1M2ZlYWQ3YjY1YjM0ZTQ0MGE4YzRhNmUyMzVhNDFjNjEyOThiMWZjYTZjMjXkZTUxMTA9OGVkN2NlODMxYWY3IiwiaWF0IjoxNTIwMzUzMDMwLCJlcHAiOjE1NTE4ODkwMzAsInJvbGUiOiJVc2VyIiwiZ3JvdDEiOiJEdWNoZW5uZSBQYXJlbnQgUHJfrmVjdCBOZXRoZXJsYW5kcyJ9.MloW8eeJ857FY7-vwxJaMDajFmmVStGDcnfHfGJx05k",
- *  "lang": "en"
- * }
- *
- */
-function isLogged2FA(req,res){
-	let email=(req.body.email).toLowerCase();
-	User.getAuthenticated(email, req.body.password, function(err, user, reason) {
-		if (err) return res.status(500).send({ message: err })
+function getStatus2FA(res, token, userFound, deviceId){
+	return new Promise((resolve)=>{
+		authy.check_approval_status(token, function (err, authResponse) {
+			if (err) {
+				res.status(500).send({message:"Bad Request for checking approval status"});
+			} else {
+				// New Device to Update
+				if(authResponse.approval_request.status=='approved'){
+					if((userFound.authyDeviceId!=null)&&(userFound.authyDeviceId!=undefined)){
+						var yetAdded = false;
+						for (var i = 0; i< userFound.authyDeviceId.length;i++){
+							if(userFound.authyDeviceId[i]==deviceId){
+								yetAdded = true;
+							}
+						}
+						if(yetAdded == false){
+							userFound.authyDeviceId.push(deviceId)
+						}
+					}
+					else{
+						userFound.authyDeviceId=deviceId;
+					}
+					if(yetAdded == false){
+						User.findByIdAndUpdate(userFound._id,userFound,(err,userUpdated)=>{
+							if (err) return res.status(500).send({ message: err });
+							if(userUpdated){
+								resolve(authResponse.approval_request.status);
+							}
+						})
+					}
+					else {
+						resolve(authResponse.approval_request.status);
+					}
+				}
+				// Pending or denied
+				else{
+					resolve(authResponse.approval_request.status);
+				}
+			}
 
-		// login was successful if we have a user
-		if (user) {
-			return res.status(200).send({
-				message: 'You have successfully logged in',
-				token: serviceAuth.createToken(user),
-				lang: user.lang
-			})
-		}else{
-			return res.status(200).send({ message: reason })
-		}
+		});	
 	})
-
-
+	
 }
 
 /**
@@ -1149,7 +1103,6 @@ function isLogged2FA(req,res){
  * }
  *
  */
-
 function getUser (req, res){
 	let userId= crypt.decrypt(req.params.userId);
 	//añado  {"_id" : false} para que no devuelva el _id
@@ -1287,9 +1240,7 @@ module.exports = {
 	signUp,
 	signIn,
 	registerUserInAuthy,
-	sendApprovalRequest,
-	getStatus2FA,
-	isLogged2FA,
+	signin2FA,
 	getUser,
 	getSettings,
 	updateUser,
