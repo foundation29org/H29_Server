@@ -1,8 +1,11 @@
 // functions for each call of the api on user. Use the user model
 
 'use strict'
-
-
+let appInsights = require('applicationinsights');
+const config = require('../../config')
+appInsights.setup(config.APPINSIGHTS_INSTRUMENTATIONKEY).setAutoCollectRequests(false);
+appInsights.start();
+let clientInsights = appInsights.defaultClient;
 // add the user model
 const User = require('../../models/user')
 const serviceAuth = require('../../services/auth')
@@ -673,6 +676,7 @@ function signIn(req, res){
 		// otherwise we can determine why we failed
 		else {
 			var reasons = User.failedLogin;
+			clientInsights.trackEvent({name: "my custom event", properties: {reason: Object.keys(reasons)[reason], req: req.headers}});
 			switch (reason) {
 				case reasons.NOT_FOUND:
 					return res.status(202).send({
@@ -716,7 +720,7 @@ function signIn(req, res){
  * @apiDescription This method gets the response about update the phone information of the user and the registration in Authy application. An email will be sent to indicate the next steps for the user.
  *
  * @apiExample {js} Example usage
- *  var passwordsha512 = sha512("fjie76?vDh"); 		
+ *  var passwordsha512 = sha512("fjie76?vDh");
  *  var param={email:"aa@aa.com", password:passwordsha512, countryselectedPhoneCode:"+34",phone:"66666666",device:{id:this.deviceId,info:this.deviceInformation}};
  *  this.http.post('https://health29.org/api/signin/registerUserInAuthy',params)
  *  .subscribe( (res : any) => {
@@ -782,7 +786,7 @@ function signIn(req, res){
  *
  * @apiSuccess (Success 200) {String} message If all goes well, the system should return "User Registered in Authy" and the token.
  *
- * @apiSuccess (Failed 500) {String} string Information about the request was failed: 
+ * @apiSuccess (Failed 500) {String} string Information about the request was failed:
  * 			<ul> Error finding the user </ul>
  * 			<ul> User not found </ul>
  * 			<ul> Error finding the group </ul>
@@ -812,7 +816,7 @@ function registerUserInAuthy(req,res){
 					// If user is authenticated
 					User.getAuthenticated(email, password, function(err, user, reason) {
 						if (err) {return res.status(500).send({ message: err })}
-						if (user) {	
+						if (user) {
 							authy.register_user(userFound.email,phone,countryCode,false,function (err, res0) {
 								if(err){
 									console.log(err)
@@ -831,7 +835,7 @@ function registerUserInAuthy(req,res){
 								})
 							});
 						}
-					});							
+					});
 				}
 				else{
 					return res.status(500).send({ message: 'Group not found' });
@@ -868,7 +872,7 @@ function registerUserInAuthy(req,res){
  * 			"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb…ML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
  * 		 },
  * 		"deviceId":"1234"};
- * 
+ *
  *  this.http.post('https://health29.org/api/signin2FA/',body)
  *  .subscribe( (res : any) => {
  *		if(res.type=="2FA approved"){
@@ -925,22 +929,22 @@ function registerUserInAuthy(req,res){
  * 		 	},
  * 			"deviceId":"1234"
  * 		}
- * 
- * @apiSuccess {String} message 
+ *
+ * @apiSuccess {String} message
  * 		<ul> If the request is approved by the user: "You have successfully logged in" </ul>
  * 		<ul> If the request is denied by the user "Authentication denied" </ul>
- * @apiSuccess {String} token 
+ * @apiSuccess {String} token
  * 		<ul> If the request is approved by the user - the unique token for the user access to Health29 </ul>
  * 		<ul> If the request is denied by the user: null </ul>
- * @apiSuccess {String} lang 
+ * @apiSuccess {String} lang
  * 		<ul> If the request is approved by the user - Lang of the User. </ul>
  * 		<ul> If the request is denied by the user: null </ul>
- * 
+ *
  * @apiSuccess (Failed 500) {Object} json Some errors could return 500 error (specified in message field of the object result)
  * 		<ul> {message: "Bad Request sending approval"} </ul>
  * 		<ul> {message: "Bad Request for checking approval status"} </ul>
  * 		<ul> {message: "User not found"} </ul>
- * 
+ *
  * @apiSuccessExample Success-Response:
  * HTTP/1.1 200  OK
  * {
@@ -987,7 +991,7 @@ function signin2FA(req,res){
 						await User.getAuthenticated(emailAuthenticated, password, function(err, user, reason) {
 							if (err) {return res.status(500).send({ message: err })}
 							// login was successful if we have a user
-							if (user) {								
+							if (user) {
 								return res.status(200).send({
 									message: 'You have successfully logged in',
 									token: serviceAuth.createToken(user),
@@ -1005,7 +1009,7 @@ function signin2FA(req,res){
 							lang: null}
 						);
 					}
-					
+
 				}
 			});
 		}
@@ -1054,9 +1058,9 @@ function getStatus2FA(res, token, userFound, deviceId){
 				}
 			}
 
-		});	
+		});
 	})
-	
+
 }
 
 /**

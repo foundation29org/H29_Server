@@ -14,6 +14,7 @@ const config = require('./config')
 //CORS middleware
 
 appInsights.setup(config.APPINSIGHTS_INSTRUMENTATIONKEY);
+//appInsights.setup(config.APPINSIGHTS_INSTRUMENTATIONKEY).setAutoCollectRequests(false);
 appInsights.start();
 
 function setCrossDomain(req, res, next) {
