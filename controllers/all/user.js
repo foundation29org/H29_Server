@@ -1,12 +1,9 @@
 // functions for each call of the api on user. Use the user model
 
 'use strict'
-let appInsights = require('applicationinsights');
-const config = require('../../config')
-appInsights.setup(config.APPINSIGHTS_INSTRUMENTATIONKEY).setAutoCollectRequests(false);
-appInsights.start();
-let clientInsights = appInsights.defaultClient;
 // add the user model
+const { appInsights } = require('../../app_Insights')
+let clientInsights = appInsights.defaultClient;
 const User = require('../../models/user')
 const serviceAuth = require('../../services/auth')
 const serviceEmail = require('../../services/email')
@@ -676,7 +673,7 @@ function signIn(req, res){
 		// otherwise we can determine why we failed
 		else {
 			var reasons = User.failedLogin;
-			clientInsights.trackEvent({name: "my custom event", properties: {reason: Object.keys(reasons)[reason], req: req.headers}});
+			clientInsights.trackEvent({name: "Login event fail", properties: {reason: Object.keys(reasons)[reason], headers: req.headers, body: req.body}});
 			switch (reason) {
 				case reasons.NOT_FOUND:
 					return res.status(202).send({

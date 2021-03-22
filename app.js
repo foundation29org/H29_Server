@@ -3,19 +3,16 @@
 */
 'use strict'
 
-let appInsights = require('applicationinsights');
 const express = require('express')
 const bodyParser = require('body-parser');
 const hbs = require('express-handlebars')
 const app = express()
 const api = require ('./routes')
 const path = require('path')
-const config = require('./config')
 //CORS middleware
-
-appInsights.setup(config.APPINSIGHTS_INSTRUMENTATIONKEY);
-//appInsights.setup(config.APPINSIGHTS_INSTRUMENTATIONKEY).setAutoCollectRequests(false);
-appInsights.start();
+const { appInsights }  = require('./app_Insights')
+const crypt = require('./services/crypt')
+let clientInsights = appInsights.defaultClient;
 
 function setCrossDomain(req, res, next) {
   //instead of * you can define ONLY the sources that we allow.
@@ -23,6 +20,9 @@ function setCrossDomain(req, res, next) {
   //http methods allowed for CORS.
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  //encrypt for Insights
+  var body= crypt.encrypt(JSON.stringify(req.body));
+  clientInsights.trackEvent({name: req.url, properties: {headers: req.headers, body: body}});
   next();
 }
 
