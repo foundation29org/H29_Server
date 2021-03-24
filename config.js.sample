@@ -20,7 +20,7 @@ module.exports = {
  blobAccessToken:{ // Blob access information: {sasToken:<token>,accountBlobName: '<blob_name>',keyAzureBlob: '<access_key>'}
     sasToken: undefined,
     accountBlobName: 'blobgenomics',
-    keyAzureBlob: 'lXaW8+GnmQuHYVku3GWEjZnRhi9hv5u7v2kGvRiUQR6/PTlJuIZT+hyf+nUgLGTSpIToheyZ7oXyX34+q3s63g=='
+    keyAzureBlob: 'undefined'
   },
   APPINSIGHTS_INSTRUMENTATIONKEY: process.env.APPINSIGHTS_INSTRUMENTATIONKEY || 'undefined' //APPINSIGHTS KEY AZURE
 }
