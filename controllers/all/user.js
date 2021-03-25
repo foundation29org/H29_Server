@@ -473,7 +473,6 @@ function signUp(req, res){
  * <br>
  * <br>
  * The functionality of this method is directly related to the second authentication factor. That is, you have to take into account if the user you want to perform the operation with belongs or not to a patient group that has configured the 2FA.According to this, the answers obtained will be different. In this case, you will have to use the methods: [Get token 2FA](#api-Access_token-Request_approval) and [Register in Authy](#api-Access_token-Register_in_Authy).
- * At the moment the only patient group that has the functionality of 2FA implemented is Duchenne Parent Project Netherlands.
  * <br>
  * <br>
  * We use the <a href="https://www.npmjs.com/package/fingerprintjs2" target="_blank">fingerprintjs2 library</a> for configuring the params.

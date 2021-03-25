@@ -10,7 +10,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example usage",
-        "content": " var passwordsha512 = sha512(\"fjie76?vDh\"); \t\t\n var param={email:\"aa@aa.com\", password:passwordsha512, countryselectedPhoneCode:\"+34\",phone:\"66666666\",device:{id:this.deviceId,info:this.deviceInformation}};\n this.http.post('https://health29.org/api/signin/registerUserInAuthy',params)\n .subscribe( (res : any) => {\n\t\tif(res.message==\"User Registered in Authy\"){\n\t    \t// User registration OK\n\t\t}\n\t\telse{\n\t\t\t// User registration KO\n\t\t}\n });",
+        "content": " var passwordsha512 = sha512(\"fjie76?vDh\");\n var param={email:\"aa@aa.com\", password:passwordsha512, countryselectedPhoneCode:\"+34\",phone:\"66666666\",device:{id:this.deviceId,info:this.deviceInformation}};\n this.http.post('https://health29.org/api/signin/registerUserInAuthy',params)\n .subscribe( (res : any) => {\n\t\tif(res.message==\"User Registered in Authy\"){\n\t    \t// User registration OK\n\t\t}\n\t\telse{\n\t\t\t// User registration KO\n\t\t}\n });",
         "type": "js"
       },
       {
@@ -213,7 +213,7 @@ define({ "api": [
     "name": "signIn",
     "version": "1.0.0",
     "group": "Access_token",
-    "description": "<p>This method gets the token and the language for the user. This token includes the encrypt id of the user, token expiration date, role, and the group to which it belongs. The token are encoded using <a href=\"https://en.wikipedia.org/wiki/JSON_Web_Token\" target=\"_blank\">jwt</a> <br> <br> The functionality of this method is directly related to the second authentication factor. That is, you have to take into account if the user you want to perform the operation with belongs or not to a patient group that has configured the 2FA.According to this, the answers obtained will be different. In this case, you will have to use the methods: <a href=\"#api-Access_token-Request_approval\">Get token 2FA</a> and <a href=\"#api-Access_token-Register_in_Authy\">Register in Authy</a>. At the moment the only patient group that has the functionality of 2FA implemented is Duchenne Parent Project Netherlands. <br> <br> We use the <a href=\"https://www.npmjs.com/package/fingerprintjs2\" target=\"_blank\">fingerprintjs2 library</a> for configuring the params.</p>",
+    "description": "<p>This method gets the token and the language for the user. This token includes the encrypt id of the user, token expiration date, role, and the group to which it belongs. The token are encoded using <a href=\"https://en.wikipedia.org/wiki/JSON_Web_Token\" target=\"_blank\">jwt</a> <br> <br> The functionality of this method is directly related to the second authentication factor. That is, you have to take into account if the user you want to perform the operation with belongs or not to a patient group that has configured the 2FA.According to this, the answers obtained will be different. In this case, you will have to use the methods: <a href=\"#api-Access_token-Request_approval\">Get token 2FA</a> and <a href=\"#api-Access_token-Register_in_Authy\">Register in Authy</a>. <br> <br> We use the <a href=\"https://www.npmjs.com/package/fingerprintjs2\" target=\"_blank\">fingerprintjs2 library</a> for configuring the params.</p>",
     "examples": [
       {
         "title": "Example for general usage",
