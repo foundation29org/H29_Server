@@ -10,6 +10,9 @@ const app = express()
 const api = require ('./routes')
 const path = require('path')
 //CORS middleware
+const { appInsights }  = require('./app_Insights')
+const crypt = require('./services/crypt')
+let clientInsights = appInsights.defaultClient;
 
 function setCrossDomain(req, res, next) {
   //instead of * you can define ONLY the sources that we allow.
@@ -17,6 +20,9 @@ function setCrossDomain(req, res, next) {
   //http methods allowed for CORS.
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  //encrypt for Insights
+  var body= crypt.encrypt(JSON.stringify(req.body));
+  clientInsights.trackEvent({name: req.url, properties: {headers: req.headers, body: body}});
   next();
 }
 
