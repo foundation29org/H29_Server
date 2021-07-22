@@ -28,7 +28,7 @@ const UserSchema = Schema({
 		lowercase: true,
 		unique: true,
 		required: 'Email address is required',
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,63})+$/, 'Please fill a valid email address']
     },
 	password: { type: String, select: false, required: true, minlength: [8,'Password too short']},
 	role: { type: String, required: true, enum: ['Admin', 'User', 'Researcher'], default: 'User'},
