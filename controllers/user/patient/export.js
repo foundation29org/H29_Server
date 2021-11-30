@@ -49,14 +49,18 @@ async function getProm(section, patientId, listSections, listProms, result, res,
 	}
 }
 
-async function getPromData(prom, patientId, res, promData){
+async function getPromData2(prom, patientId, res, promData){
 	await PatientProm.findOne({createdBy: patientId, "definitionPromId": prom._id}).sort({ date : 'desc'}).exec(function(err, patientprom){
 		if (err) return res.status(500).send({ message: `Error activating account: ${err}`})
 		var infoProm;
+		var dateProm;
 		if (patientprom){
+			console.log(patientprom);
 			infoProm = patientprom.data;
+			dateProm = patientprom.date;
 		}else{
 			infoProm = "";
+			dateProm = "";
 		}
 		promData.push({name:prom.name,
 		relatedTo: prom.relatedTo,
@@ -67,7 +71,38 @@ async function getPromData(prom, patientId, res, promData){
 		width: prom.width,
 		hideQuestion: prom.hideQuestion,
 		responseType: prom.responseType,
-		data:infoProm});
+		data:infoProm,
+		date:dateProm});
+	});
+	return promData;
+}
+
+async function getPromData(prom, patientId, res, promData){
+	await PatientProm.find({createdBy: patientId, "definitionPromId": prom._id}).sort({ date : 'desc'}).exec(function(err, patientpromList){
+		if (err) return res.status(500).send({ message: `Error activating account: ${err}`})
+
+		for (var i=0;i<patientpromList.length;i++){
+			var infoProm;
+			var dateProm;
+			if (patientpromList[i]){
+				infoProm = patientpromList[i].data;
+				dateProm = patientpromList[i].date;
+			}else{
+				infoProm = "";
+				dateProm = "";
+			}
+			promData.push({name:prom.name,
+			relatedTo: prom.relatedTo,
+			enabled: prom.enabled,
+			promId: prom.id,
+			question: prom.question,
+			values: prom.values,
+			width: prom.width,
+			hideQuestion: prom.hideQuestion,
+			responseType: prom.responseType,
+			data:infoProm,
+			date:dateProm});
+		}
 	});
 	return promData;
 }
@@ -229,7 +264,296 @@ async function exportData (req, res){
 	})
 }
 
+async function exportSubgroups (req, res){
+	let subgroups= req.body;
+	console.log(subgroups);
+	var data = await getData(subgroups);
+	var result = [];
+	return res.status(200).send({message: 'take my data', data: data})
+
+	
+}
+
+async function getData(subgroups){
+	return new Promise(async function (resolve, reject) {
+		var resul = '';
+    	var promises = [];
+    	//await User.find({platform : "Dx29", email: 'testpatient2@test.com'},async (err, users) => {
+			await User.find({
+				'subgroup': { $in: subgroups }
+			}, function(err, users) {
+				console.log("teams name  " + subgroups);
+				for(var index in users)
+					{
+						promises.push(getPatientInfo(users[index]));
+					}
+			});
+
+		
+		
+		await Promise.all(promises)
+		.then(async function(data){
+				console.log('termina')
+				let datafinal = JSON.stringify(data);
+				resolve({ data: data})
+			})
+		.catch(function(err){
+			console.log('Manejar promesa rechazada ('+err+') aquí.');
+			return null;
+			});
+
+	});
+}
+
+async function getPatientInfo(user){
+	return new Promise(async function(resolve, reject){
+ 
+		  var promises2 = [];
+		  await Patient.find({createdBy:user._id},(err, patientsFound) => {
+			  for(var indexPatient in patientsFound)
+				{
+				promises2.push(getAllPatientInfo(patientsFound[indexPatient], indexPatient));
+				}
+		  });
+ 
+ 
+	  Promise.all(promises2)
+	 .then(function(data){
+			 console.log('datos del paciente:');
+			 resolve({ user: user, data: data})
+	  })
+	 .catch(function(err){
+	   console.log('Manejar promesa rechazada ('+err+') aquí.');
+	   return null;
+	  });
+ 
+   });
+ }
+
+ async function getAllPatientInfo(patient, index){
+	return new Promise(async function(resolve, reject){
+		  let patientId= patient._id;
+		 var promises3 = [];
+		 promises3.push(getSocialInfo(patientId));
+		 promises3.push(getHeightInfo(patientId));
+		 promises3.push(getHeightHistoryInfo(patientId));
+		 promises3.push(getWeightInfo(patientId));
+		 promises3.push(getWeightHistoryInfo(patientId));
+		 promises3.push(getMedications(patientId));
+		 promises3.push(getVaccinations(patientId));
+		 promises3.push(getOtherMedication(patientId));
+		 promises3.push(getPhenotype(patientId, index));
+		 promises3.push(getPhenotypeHistory(patientId, index));
+		 promises3.push(getGenotype(patientId));
+		 promises3.push(getMedicalCare(patientId));
+		 promises3.push(getClinicalTrial(patientId));
+		 promises3.push(getDatapoints(patientId));
+ 
+		 await Promise.all(promises3)
+	.then(async function(data){
+		  var resPatientData = [];
+		  resPatientData.push({data:patient, name:"patient"});
+		  resPatientData.push({info:data})
+		  resolve({ resPatientData: resPatientData})
+	 })
+	.catch(function(err){
+	  console.log('Manejar promesa rechazada ('+err+') aquí.');
+	  return null;
+	 });
+   });
+ }
+
+	async function getSocialInfo(patientId){
+		return new Promise(async function(resolve, reject){
+			  await SocialInfo.findOne({"createdBy": patientId}, {"createdBy" : false }, (err, socialInfo) => {
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				if(socialInfo){
+					  resolve({data:socialInfo, name:"socialInfo"});
+				  }else{
+			  		 var data = {data:[]}
+					  resolve({socialInfo:data});
+				  }
+			  })
+	   });
+	 }
+
+	 async function getHeightInfo(patientId){
+		return new Promise(async function(resolve, reject){
+			  await Height.findOne({"createdBy": patientId}, {"createdBy" : false }, (err, height) => {
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				if(height){
+					  resolve({data:height, name:"height"});
+				  }else{
+			  		 var data = {data:[]}
+					  resolve({height:data});
+				  }
+			  })
+	   });
+	 }
+
+	 async function getHeightHistoryInfo(patientId){
+		return new Promise(async function(resolve, reject){
+			  await HeightHistory.find({createdBy: patientId}, {"createdBy" : false }).sort({ dateTime : 'asc'}).exec(function(err, heights){
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				var listHeights = [];
+				heights.forEach(function(weight) {
+					listHeights.push(weight);
+				});
+				resolve({data:listHeights, name:"heightHistory"});
+			  })
+	   });
+	 }
+
+	 async function getWeightInfo(patientId){
+		return new Promise(async function(resolve, reject){
+			  await Weight.findOne({"createdBy": patientId}, {"createdBy" : false }, (err, weight) => {
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				if(weight){
+					  resolve({data:weight, name:"weight"});
+				  }else{
+			  		 var data = {data:[]}
+					  resolve({weight:data});
+				  }
+			  })
+	   });
+	 }
+
+	 async function getWeightHistoryInfo(patientId){
+		return new Promise(async function(resolve, reject){
+			  await WeightHistory.find({createdBy: patientId}, {"createdBy" : false }).sort({ dateTime : 'asc'}).exec(function(err, weights){
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				var listWeights = [];
+				weights.forEach(function(weight) {
+					listWeights.push(weight);
+				});
+				resolve({data:listWeights, name:"weightHistory"});
+			  })
+	   });
+	 }
+
+	 async function getMedications(patientId){
+		return new Promise(async function(resolve, reject){
+			  await Medication.find({createdBy: patientId}, {"createdBy" : false }).sort({ endDate : 'asc'}).exec(function(err, medications){
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				var listMedications = [];
+				medications.forEach(function(medication) {
+					listMedications.push(medication);
+				});
+				resolve({data:listMedications, name:"medication"});
+			  })
+	   });
+	 }
+
+	 async function getVaccinations(patientId){
+		return new Promise(async function(resolve, reject){
+			  await Vaccination.find({createdBy: patientId}, {"createdBy" : false }).sort({ date : 'asc'}).exec(async function(err, vaccinations){
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				var listVaccinations = [];
+				vaccinations.forEach(function(vaccination) {
+					listVaccinations.push(vaccination);
+				});
+				resolve({data:listVaccinations, name:"vaccination"});
+			  })
+	   });
+	 }
+
+	 async function getOtherMedication(patientId){
+		return new Promise(async function(resolve, reject){
+			  await OtherMedication.find({createdBy: patientId}, {"createdBy" : false }).sort({ endDate : 'asc'}).exec(function(err, medications){
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				var listMedications = [];
+				medications.forEach(function(medication) {
+					listMedications.push(medication);
+				});
+				resolve({data:listMedications, name:"otherMedication"});
+			  })
+	   });
+	 }
+
+ async function getPhenotype(patientId, index){
+	return new Promise(async function(resolve, reject){
+ 
+		  await Phenotype.findOne({"createdBy": patientId}, {"createdBy" : false }, async (err, phenotype) => {
+			  if(phenotype){
+				  resolve({data:phenotype , name:"phenotype"});
+			  }else{
+				  resolve({data:[], name:"phenotype"});
+			  }
+		  })
+   });
+ }
+ 
+ async function getPhenotypeHistory(patientId, index){
+	return new Promise(async function(resolve, reject){
+		  await PhenotypeHistory.find({createdBy: patientId}).sort({ date : 'asc'}).exec(async function(err, phenotypeHistory){
+ 
+			  var listPhenotypeHistory = [];
+			  phenotypeHistory.forEach(function(phenotype) {
+				  listPhenotypeHistory.push(phenotype);
+			  });
+			  //result.push({phenotypeHistory:listPhenotypeHistory});
+			  console.log('datos de '+ patientId)
+			  resolve({data:listPhenotypeHistory, name:"phenotypeHistory"});
+		  });
+   });
+ }
+
+ async function getGenotype(patientId){
+	return new Promise(async function(resolve, reject){
+		  await Genotype.findOne({"createdBy": patientId}, {"createdBy" : false }, (err, genotype) => {
+			if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+			if(genotype){
+				  resolve({data:genotype, name:"genotype"});
+			  }else{
+				resolve({data:[], name:"genotype"});
+			  }
+		  })
+   });
+ }
+
+ async function getMedicalCare(patientId){
+	return new Promise(async function(resolve, reject){
+		  await MedicalCare.findOne({"createdBy": patientId}, {"createdBy" : false }, async function (err, medicalCare){
+			if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+			if(medicalCare){
+				resolve({data: medicalCare, name:"medicalCare"});
+			}
+		  })
+   });
+ }
+
+ async function getClinicalTrial(patientId){
+	return new Promise(async function(resolve, reject){
+		  await ClinicalTrial.find({createdBy: patientId}, {"createdBy" : false }).sort({ date : 'asc'}).exec(function(err, clinicaltrials){
+			if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+		
+			var listClinicalTrials = [];
+			clinicaltrials.forEach(function(clinicalTrial) {
+				listClinicalTrials.push(clinicalTrial);
+			});
+			resolve({data:listClinicalTrials, name:"clinicalTrials"});
+		  })
+   });
+ }
+
+ async function getDatapoints(patientId){
+	return new Promise(async function(resolve, reject){
+		  await PatientProm.find({createdBy: patientId}, {"createdBy" : false }).sort({ date : 'desc'}).exec(function(err, patientpromList){
+			if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+		
+			var listPatientpromList = [];
+			patientpromList.forEach(function(clinicalTrial) {
+				listPatientpromList.push(clinicalTrial);
+			});
+			resolve({data:listPatientpromList, name:"datapoints"});
+		  })
+   });
+ }
+
+
+
 
 module.exports = {
-	exportData
+	exportData,
+	exportSubgroups
 }
