@@ -197,6 +197,7 @@ function savePromSection (req, res){
 		prom.section = req.body.section
 		prom.order = req.body.order
 		prom.periodicity = req.body.periodicity
+		prom.hpo = req.body.hpo
 		prom.isRequired = req.body.isRequired
 		prom.enabled = req.body.enabled
 		prom.width = req.body.width
