@@ -46,6 +46,8 @@ const botQnaCntrl = require('../controllers/bot/botQnaCntrl')
 const alertsCtrl = require('../controllers/all/alerts')
 const useralertsCtrl = require('../controllers/all/useralerts')
 
+const f29gatewayCtrl = require('../services/f29gateway')
+
 const f29azureserviceCtrl = require('../services/f29azure')
 
 const auth = require('../middlewares/auth')
@@ -231,6 +233,7 @@ api.get('/group/prom/:promId', promCtrl.getPromSection)
 api.post('/group/prom/:userIdAndgroupId', auth(roles.SuperAdmin), promCtrl.savePromSection)
 api.put('/group/prom/:userId', auth(roles.SuperAdmin), promCtrl.updatePromSection)
 api.delete('/group/prom/:userIdAndpromId', auth(roles.SuperAdmin), promCtrl.deletePromSection)
+api.post('/group/annotations/:userId', auth(roles.SuperAdmin), promCtrl.batchImportPromAnnotations)
 
 //proms for each section
 api.get('/proms', patientPromCtrl.getDataPromsSection)
@@ -305,6 +308,9 @@ api.post('/useralerts/updateToLaunch/:patientId',auth(roles.OnlyUser), useralert
 //getsastoken
 api.get('/getAzureBlobSasTokenWithContainer/:containerName',auth(roles.AllLessResearcher), f29azureserviceCtrl.getAzureBlobSasTokenWithContainer)
 api.get('/getAzureBlobSasTokenRead/:containerName',auth(roles.All), f29azureserviceCtrl.getAzureBlobSasTokenRead)
+
+//gateway
+api.post('/gateway/search/symptoms/', f29gatewayCtrl.searchSymptoms)
 
 //ruta privada
 api.get('/private', auth(roles.AllLessResearcher), (req, res) => {

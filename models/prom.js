@@ -15,6 +15,7 @@ const PromSchema = Schema({
 	question: String,
 	hideQuestion: {type: Boolean, default: false},
 	marginTop: {type: Boolean, default: false},
+	annotations: Array,
 	values: Array,
 	section: { type: Schema.Types.ObjectId, ref: "PromSection"},
 	order:Number,
