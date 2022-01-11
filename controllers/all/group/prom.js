@@ -197,6 +197,7 @@ function savePromSection (req, res){
 		prom.section = req.body.section
 		prom.order = req.body.order
 		prom.periodicity = req.body.periodicity
+		prom.annotations = req.body.annotations
 		prom.isRequired = req.body.isRequired
 		prom.enabled = req.body.enabled
 		prom.width = req.body.width
@@ -248,11 +249,6 @@ function savePromSection (req, res){
 														enc = true;
 														if(prom.values.length>0){
 															for (var k = 0; k < prom.values.length; k++) {
-																/*if(prom.values[k].value){
-																	prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value}
-																}else{
-																	prom.values[k] = {original: prom.values[k], translation: prom.values[k]}
-																}*/
 																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 															}
 														}
@@ -306,11 +302,6 @@ function savePromSection (req, res){
 														enc = true;
 														if(prom.values.length>0){
 															for (var k = 0; k < prom.values.length; k++) {
-																/*if(prom.values[k].value){
-																	prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value}
-																}else{
-																	prom.values[k] = {original: prom.values[k], translation: prom.values[k]}
-																}*/
 																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 															}
 														}
@@ -350,11 +341,6 @@ function savePromSection (req, res){
 													enc = true;
 													if(prom.values.length>0){
 														for (var k = 0; k < prom.values.length; k++) {
-															/*if(prom.values[k].value){
-																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value}
-															}else{
-																prom.values[k] = {original: prom.values[k], translation: prom.values[k]}
-															}*/
 															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 														}
 													}
@@ -395,11 +381,6 @@ function savePromSection (req, res){
 												enc = true;
 												if(prom.values.length>0){
 													for (var k = 0; k < prom.values.length; k++) {
-														/*if(prom.values[k].value){
-															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value}
-														}else{
-															prom.values[k] = {original: prom.values[k], translation: prom.values[k]}
-														}*/
 														prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 													}
 												}
@@ -589,7 +570,7 @@ async function processObj(lang, promUpdated, section, promold, machacar){
 										if(structureProm.data[i].promsStructure[j].structure.values[k]==undefined){
 											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, annotations: promUpdated.values[k].annotations}
 										}else{
-											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: structureProm.data[i].promsStructure[j].structure.values[k].translation}
+											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: structureProm.data[i].promsStructure[j].structure.values[k].translation, annotations: promUpdated.values[k].annotations}
 										}
 									}
 

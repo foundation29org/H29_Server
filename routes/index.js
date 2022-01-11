@@ -35,8 +35,6 @@ const admninQnaCtrl = require('../controllers/admin/qna')
 const superadmninQnaCtrl = require('../controllers/superadmin/qna')
 const superAdmninLangCtrl = require('../controllers/superadmin/lang')
 
-const hpoServiceCtrl = require('../services/hpo-info')
-
 const seizuresCtrl = require('../controllers/user/patient/seizures')
 
 const supportCtrl = require('../controllers/all/support')
@@ -250,9 +248,6 @@ api.put('/structureproms/:promId', auth(roles.SuperAdmin), structurePromCtrl.upd
 
 // lang routes, using the controller lang, this controller has methods
 api.get('/langs/',  langCtrl.getLangs)
-
-api.get('/hpoinfoservice', auth(roles.UserResearcher), hpoServiceCtrl.getHposInfo)
-
 
 // seizuresCtrl routes, using the controller seizures, this controller has methods
 api.get('/seizures/:patientId', auth(roles.UserResearcher), seizuresCtrl.getSeizures)
