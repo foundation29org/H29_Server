@@ -24,7 +24,6 @@ const PromSchema = Schema({
 	enabled: {type: Boolean, default: false},
 	createdBy: { type: Schema.Types.ObjectId, ref: "Group"},
 	width: String,
-	hpo: String,
 	relatedTo: { type: Schema.Types.ObjectId, ref: "PromSchema"},
 	disableDataPoints: { type: Schema.Types.ObjectId, ref: "PromSchema"}
 

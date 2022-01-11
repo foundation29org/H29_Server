@@ -197,7 +197,6 @@ function savePromSection (req, res){
 		prom.section = req.body.section
 		prom.order = req.body.order
 		prom.periodicity = req.body.periodicity
-		prom.hpo = req.body.hpo
 		prom.isRequired = req.body.isRequired
 		prom.enabled = req.body.enabled
 		prom.width = req.body.width
@@ -250,11 +249,11 @@ function savePromSection (req, res){
 														if(prom.values.length>0){
 															for (var k = 0; k < prom.values.length; k++) {
 																/*if(prom.values[k].value){
-																	prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
+																	prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value}
 																}else{
-																	prom.values[k] = {original: prom.values[k], translation: prom.values[k], hpo: null}
+																	prom.values[k] = {original: prom.values[k], translation: prom.values[k]}
 																}*/
-																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo, annotations: prom.values[k].annotations}
+																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 															}
 														}
 														var nuwValue = {data: [], structure: prom};
@@ -308,11 +307,11 @@ function savePromSection (req, res){
 														if(prom.values.length>0){
 															for (var k = 0; k < prom.values.length; k++) {
 																/*if(prom.values[k].value){
-																	prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
+																	prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value}
 																}else{
-																	prom.values[k] = {original: prom.values[k], translation: prom.values[k], hpo: null}
+																	prom.values[k] = {original: prom.values[k], translation: prom.values[k]}
 																}*/
-																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo, annotations: prom.values[k].annotations}
+																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 															}
 														}
 														var nuwValue = {data: [], structure: prom};
@@ -352,11 +351,11 @@ function savePromSection (req, res){
 													if(prom.values.length>0){
 														for (var k = 0; k < prom.values.length; k++) {
 															/*if(prom.values[k].value){
-																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
+																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value}
 															}else{
-																prom.values[k] = {original: prom.values[k], translation: prom.values[k], hpo: null}
+																prom.values[k] = {original: prom.values[k], translation: prom.values[k]}
 															}*/
-															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo, annotations: prom.values[k].annotations}
+															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 														}
 													}
 													var nuwValue = {data: [], structure: prom};
@@ -397,11 +396,11 @@ function savePromSection (req, res){
 												if(prom.values.length>0){
 													for (var k = 0; k < prom.values.length; k++) {
 														/*if(prom.values[k].value){
-															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
+															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value}
 														}else{
-															prom.values[k] = {original: prom.values[k], translation: prom.values[k], hpo: null}
+															prom.values[k] = {original: prom.values[k], translation: prom.values[k]}
 														}*/
-														prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo, annotations: prom.values[k].annotations}
+														prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 													}
 												}
 												var nuwValue = {data: [], structure: prom};
@@ -585,10 +584,10 @@ async function processObj(lang, promUpdated, section, promold, machacar){
 
 								for (var k = 0; k < promUpdated.values.length; k++) {
 									if(machacar){
-										promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, hpo: promUpdated.values[k].hpo, annotations: promUpdated.values[k].annotations}
+										promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, annotations: promUpdated.values[k].annotations}
 									}else{
 										if(structureProm.data[i].promsStructure[j].structure.values[k]==undefined){
-											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, hpo: promUpdated.values[k].hpo, annotations: promUpdated.values[k].annotations}
+											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, annotations: promUpdated.values[k].annotations}
 										}else{
 											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: structureProm.data[i].promsStructure[j].structure.values[k].translation}
 										}

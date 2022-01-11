@@ -78,6 +78,7 @@ api.delete('/users/:userId', auth(roles.AllLessResearcher), userCtrl.deleteUser)
 //export data
 api.get('/exportdata/:patientId', auth(roles.All), exportCtrl.exportData)
 api.post('/exportsubgroups', auth(roles.Admin), exportCtrl.exportSubgroups)
+api.get('/sections/group/:groupName', auth(roles.All), exportCtrl.getSectionsGroup)
 
 
 // patient routes, using the controller patient, this controller has methods
