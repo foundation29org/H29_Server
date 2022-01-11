@@ -35,8 +35,6 @@ const admninQnaCtrl = require('../controllers/admin/qna')
 const superadmninQnaCtrl = require('../controllers/superadmin/qna')
 const superAdmninLangCtrl = require('../controllers/superadmin/lang')
 
-const hpoServiceCtrl = require('../services/hpo-info')
-
 const seizuresCtrl = require('../controllers/user/patient/seizures')
 
 const supportCtrl = require('../controllers/all/support')
@@ -45,6 +43,8 @@ const botQnaCntrl = require('../controllers/bot/botQnaCntrl')
 
 const alertsCtrl = require('../controllers/all/alerts')
 const useralertsCtrl = require('../controllers/all/useralerts')
+
+const f29gatewayCtrl = require('../services/f29gateway')
 
 const f29azureserviceCtrl = require('../services/f29azure')
 
@@ -75,6 +75,8 @@ api.delete('/users/:userId', auth(roles.AllLessResearcher), userCtrl.deleteUser)
 
 //export data
 api.get('/exportdata/:patientId', auth(roles.All), exportCtrl.exportData)
+api.post('/exportsubgroups', auth(roles.Admin), exportCtrl.exportSubgroups)
+api.get('/sections/group/:groupName', auth(roles.All), exportCtrl.getSectionsGroup)
 
 
 // patient routes, using the controller patient, this controller has methods
@@ -230,6 +232,7 @@ api.get('/group/prom/:promId', promCtrl.getPromSection)
 api.post('/group/prom/:userIdAndgroupId', auth(roles.SuperAdmin), promCtrl.savePromSection)
 api.put('/group/prom/:userId', auth(roles.SuperAdmin), promCtrl.updatePromSection)
 api.delete('/group/prom/:userIdAndpromId', auth(roles.SuperAdmin), promCtrl.deletePromSection)
+api.post('/group/annotations/:userId', auth(roles.SuperAdmin), promCtrl.batchImportPromAnnotations)
 
 //proms for each section
 api.get('/proms', patientPromCtrl.getDataPromsSection)
@@ -245,9 +248,6 @@ api.put('/structureproms/:promId', auth(roles.SuperAdmin), structurePromCtrl.upd
 
 // lang routes, using the controller lang, this controller has methods
 api.get('/langs/',  langCtrl.getLangs)
-
-api.get('/hpoinfoservice', auth(roles.UserResearcher), hpoServiceCtrl.getHposInfo)
-
 
 // seizuresCtrl routes, using the controller seizures, this controller has methods
 api.get('/seizures/:patientId', auth(roles.UserResearcher), seizuresCtrl.getSeizures)
@@ -304,6 +304,9 @@ api.post('/useralerts/updateToLaunch/:patientId',auth(roles.OnlyUser), useralert
 //getsastoken
 api.get('/getAzureBlobSasTokenWithContainer/:containerName',auth(roles.AllLessResearcher), f29azureserviceCtrl.getAzureBlobSasTokenWithContainer)
 api.get('/getAzureBlobSasTokenRead/:containerName',auth(roles.All), f29azureserviceCtrl.getAzureBlobSasTokenRead)
+
+//gateway
+api.post('/gateway/search/symptoms/', f29gatewayCtrl.searchSymptoms)
 
 //ruta privada
 api.get('/private', auth(roles.AllLessResearcher), (req, res) => {
