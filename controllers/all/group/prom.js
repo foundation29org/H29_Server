@@ -197,6 +197,7 @@ function savePromSection (req, res){
 		prom.section = req.body.section
 		prom.order = req.body.order
 		prom.periodicity = req.body.periodicity
+		prom.annotations = req.body.annotations
 		prom.isRequired = req.body.isRequired
 		prom.enabled = req.body.enabled
 		prom.width = req.body.width
@@ -248,12 +249,7 @@ function savePromSection (req, res){
 														enc = true;
 														if(prom.values.length>0){
 															for (var k = 0; k < prom.values.length; k++) {
-																/*if(prom.values[k].value){
-																	prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
-																}else{
-																	prom.values[k] = {original: prom.values[k], translation: prom.values[k], hpo: null}
-																}*/
-																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
+																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 															}
 														}
 														var nuwValue = {data: [], structure: prom};
@@ -306,12 +302,7 @@ function savePromSection (req, res){
 														enc = true;
 														if(prom.values.length>0){
 															for (var k = 0; k < prom.values.length; k++) {
-																/*if(prom.values[k].value){
-																	prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
-																}else{
-																	prom.values[k] = {original: prom.values[k], translation: prom.values[k], hpo: null}
-																}*/
-																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
+																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 															}
 														}
 														var nuwValue = {data: [], structure: prom};
@@ -350,12 +341,7 @@ function savePromSection (req, res){
 													enc = true;
 													if(prom.values.length>0){
 														for (var k = 0; k < prom.values.length; k++) {
-															/*if(prom.values[k].value){
-																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
-															}else{
-																prom.values[k] = {original: prom.values[k], translation: prom.values[k], hpo: null}
-															}*/
-															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
+															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 														}
 													}
 													var nuwValue = {data: [], structure: prom};
@@ -395,12 +381,7 @@ function savePromSection (req, res){
 												enc = true;
 												if(prom.values.length>0){
 													for (var k = 0; k < prom.values.length; k++) {
-														/*if(prom.values[k].value){
-															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
-														}else{
-															prom.values[k] = {original: prom.values[k], translation: prom.values[k], hpo: null}
-														}*/
-														prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, hpo: prom.values[k].hpo}
+														prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
 													}
 												}
 												var nuwValue = {data: [], structure: prom};
@@ -584,12 +565,12 @@ async function processObj(lang, promUpdated, section, promold, machacar){
 
 								for (var k = 0; k < promUpdated.values.length; k++) {
 									if(machacar){
-										promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, hpo: promUpdated.values[k].hpo}
+										promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, annotations: promUpdated.values[k].annotations}
 									}else{
 										if(structureProm.data[i].promsStructure[j].structure.values[k]==undefined){
-											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, hpo: promUpdated.values[k].hpo}
+											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, annotations: promUpdated.values[k].annotations}
 										}else{
-											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: structureProm.data[i].promsStructure[j].structure.values[k].translation}
+											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: structureProm.data[i].promsStructure[j].structure.values[k].translation, annotations: promUpdated.values[k].annotations}
 										}
 									}
 
@@ -768,10 +749,88 @@ function deletePromSection (req, res){
 
 }
 
+function batchImportPromAnnotations (req, res){
+	let userId= crypt.decrypt(req.params.userId);
+	User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+	  if (err) return res.status(500).send({message: 'Error making the request:'})
+	  if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
+  
+	  if(user.role == 'SuperAdmin'){
+		  var cont = 0;
+		for (var k = 0; k < req.body.length; k++) {
+			var promId= req.body[k].idProm;
+			var annotations= req.body[k].annotations;
+			Prom.findByIdAndUpdate(promId, { annotations: annotations }, {new: true}, (err, promUpdated) => {
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				if(promUpdated){
+					console.log('updated')
+				}
+				cont++;
+				if(cont==req.body.length-1){
+					return res.status(200).send({message: 'Proms imported'})
+				}
+			})
+		}
+	  }else{
+		  res.status(401).send({message: 'without permission'})
+		}
+  
+	})
+  
+  }
+
+  function batchImportPromAnnotations2 (req, res){
+	let userId= crypt.decrypt(req.params.userId);
+	User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+	  if (err) return res.status(500).send({message: 'Error making the request:'})
+	  if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
+  
+	  if(user.role == 'SuperAdmin'){
+		  var cont = 0;
+		for (var k = 0; k < req.body.length; k++) {
+			var promId= req.body[k].idProm;
+			var annotations= req.body[k].annotations;
+			Prom.findById(promId, (err, prom) => {
+				if (err) return res.status(500).send({message: `Error deleting the prom: ${err}`})
+				if(prom){
+					console.log('encontrado');
+					console.log(annotations);
+					Prom.findByIdAndUpdate(prom._id, { annotations: annotations }, {new: true}, (err, promUpdated) => {
+						if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+						if(promUpdated){
+							console.log('updated')
+						}else{
+							console.log('not updated')
+						}
+						cont++;
+						if(cont==req.body.length-1){
+							return res.status(200).send({message: 'Proms imported'})
+						}
+					})
+				}else{
+					cont++;
+					if(cont==req.body.length-1){
+						return res.status(200).send({message: 'Proms imported'})
+					}
+				}
+			})
+			
+		}
+		
+  
+	  }else{
+		  res.status(401).send({message: 'without permission'})
+		}
+  
+	})
+  
+  }
+
 module.exports = {
   getPromsSection,
   getPromSection,
   savePromSection,
   updatePromSection,
-  deletePromSection
+  deletePromSection,
+  batchImportPromAnnotations
 }

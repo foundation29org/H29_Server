@@ -15,6 +15,7 @@ const PromSchema = Schema({
 	question: String,
 	hideQuestion: {type: Boolean, default: false},
 	marginTop: {type: Boolean, default: false},
+	annotations: Array,
 	values: Array,
 	section: { type: Schema.Types.ObjectId, ref: "PromSection"},
 	order:Number,
@@ -23,7 +24,6 @@ const PromSchema = Schema({
 	enabled: {type: Boolean, default: false},
 	createdBy: { type: Schema.Types.ObjectId, ref: "Group"},
 	width: String,
-	hpo: String,
 	relatedTo: { type: Schema.Types.ObjectId, ref: "PromSchema"},
 	disableDataPoints: { type: Schema.Types.ObjectId, ref: "PromSchema"}
 
