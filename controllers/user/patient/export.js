@@ -627,15 +627,15 @@ async function getDatapoints(patientId) {
 					}
 					if (prom != undefined) {
 						//console.log(prom)
-						var annotations= prom.annotations;
+						var answerAnnotations = [];
 						if(prom.values.length>0){
 							for (var j = 0; j < prom.values.length; j++) {
 								if(promData.data==prom.values[j].value){
-									annotations = prom.annotations.concat(prom.values[j].annotations);
+									answerAnnotations = prom.values[j].annotations;
 								}
 							}
 						}
-						var res = { definitionPromId: promData.definitionPromId, date: promData.date, answer: promData.data, question: prom.question, dependsOn: prom.relatedTo, responseType: prom.responseType, section: prom.section, annotations: annotations }
+						var res = { definitionPromId: promData.definitionPromId, date: promData.date, answer: promData.data, question: prom.question, dependsOn: prom.relatedTo, responseType: prom.responseType, section: prom.section, annotations: prom.annotations, answerAnnotations: answerAnnotations }
 						listPatientpromList.push(res);
 					} else {
 						listPatientpromList.push(promData);

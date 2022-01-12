@@ -9,6 +9,11 @@ const PromSection = require('./prom-section')
 
 const { conndbaccounts } = require('../db_connect')
 
+const ValuesSchema = Schema({
+	annotations: Array,
+	value: String
+})
+
 const PromSchema = Schema({
 	name: String,
 	responseType: String,
@@ -16,7 +21,7 @@ const PromSchema = Schema({
 	hideQuestion: {type: Boolean, default: false},
 	marginTop: {type: Boolean, default: false},
 	annotations: Array,
-	values: Array,
+	values: [ValuesSchema],
 	section: { type: Schema.Types.ObjectId, ref: "PromSection"},
 	order:Number,
 	periodicity: Number,
