@@ -7118,6 +7118,13 @@
           },
           {
             "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "otherinterest",
+            "description": "<p>If interests contains Other.</p>"
+          },
+          {
+            "group": "Success 200",
             "type": "String[]",
             "allowedValues": [
               "\"swimming\"",
@@ -7129,6 +7136,13 @@
             "optional": false,
             "field": "sports",
             "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "othersport",
+            "description": "<p>If sports contains Other.</p>"
           },
           {
             "group": "Success 200",
@@ -7173,7 +7187,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\"socialInfo\":\n  {\n    \"_id\":\"5a6f4b83f660d806744f3ef6\",\n    \"profession\":\"\",\n    \"hoursWork\":\"\",\n    \"work\":\"no\",\n    \"currentEducation\":\"\",\n    \"completedEducation\":\"\",\n    \"education\":\"regularEducation\",\n    \"interests\":[\"gaming\",\"music\"],\n    \"sports\":[\"other\"],\n    \"support\":[\"helpers\",\"friends\"],\n    \"livingSituation\":[\"partner\"]\n  }\n}\n\nHTTP/1.1 202 OK\n{message: 'There are no social info'}",
+          "content": "HTTP/1.1 200 OK\n{\"socialInfo\":\n  {\n    \"_id\":\"5a6f4b83f660d806744f3ef6\",\n    \"profession\":\"\",\n    \"hoursWork\":\"\",\n    \"work\":\"no\",\n    \"currentEducation\":\"\",\n    \"completedEducation\":\"\",\n    \"education\":\"regularEducation\",\n    \"interests\":[\"gaming\",\"music\"],\n    \"otherinterest\":\"\",\n    \"sports\":[\"other\"],\n    \"othersport\":\"\",\n    \"support\":[\"helpers\",\"friends\"],\n    \"livingSituation\":[\"partner\"]\n  }\n}\n\nHTTP/1.1 202 OK\n{message: 'There are no social info'}",
           "type": "json"
         }
       ]
@@ -7192,7 +7206,7 @@
     "examples": [
       {
         "title": "Example usage:",
-        "content": "var socialInfo = {education: '', completedEducation: '', currentEducation: '', work: '', hoursWork: '', profession: '', livingSituation: '', support: [], sports: [], interests: []};\nthis.http.post('https://health29.org/api/socialinfos/'+patientId, socialInfo)\n .subscribe( (res : any) => {\n   console.log('social info: '+ res.socialInfo);\n  }, (err) => {\n   ...\n  }",
+        "content": "var socialInfo = {education: '', completedEducation: '', currentEducation: '', work: '', hoursWork: '', profession: '', livingSituation: '', support: [], sports: [], othersport: '', interests: [], otherinterest: ''};\nthis.http.post('https://health29.org/api/socialinfos/'+patientId, socialInfo)\n .subscribe( (res : any) => {\n   console.log('social info: '+ res.socialInfo);\n  }, (err) => {\n   ...\n  }",
         "type": "js"
       }
     ],
@@ -7297,6 +7311,13 @@
           },
           {
             "group": "body",
+            "type": "String",
+            "optional": true,
+            "field": "otherinterest",
+            "description": "<p>If interests contains Other</p>"
+          },
+          {
+            "group": "body",
             "type": "String[]",
             "allowedValues": [
               "\"swimming\"",
@@ -7308,6 +7329,13 @@
             "optional": true,
             "field": "sports",
             "description": ""
+          },
+          {
+            "group": "body",
+            "type": "String",
+            "optional": true,
+            "field": "othersport",
+            "description": "<p>If sports contains Other</p>"
           },
           {
             "group": "body",
@@ -7363,7 +7391,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\"socialInfo\":\n  {\n    \"_id\":\"5a6f4b83f660d806744f3ef6\",\n    \"profession\":\"\",\n    \"hoursWork\":\"\",\n    \"work\":\"no\",\n    \"currentEducation\":\"\",\n    \"completedEducation\":\"\",\n    \"education\":\"regularEducation\",\n    \"interests\":[\"gaming\",\"music\"],\n    \"sports\":[\"other\"],\n    \"support\":[\"helpers\",\"friends\"],\n    \"livingSituation\":[\"partner\"]\n  },\n\"message\": \"Social Info created\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\"socialInfo\":\n  {\n    \"_id\":\"5a6f4b83f660d806744f3ef6\",\n    \"profession\":\"\",\n    \"hoursWork\":\"\",\n    \"work\":\"no\",\n    \"currentEducation\":\"\",\n    \"completedEducation\":\"\",\n    \"education\":\"regularEducation\",\n    \"interests\":[\"gaming\",\"music\"],\n    \"otherinterest\":\"\",\n    \"sports\":[\"other\"],\n    \"othersport\":\"\",\n    \"support\":[\"helpers\",\"friends\"],\n    \"livingSituation\":[\"partner\"]\n  },\n\"message\": \"Social Info created\"\n}",
           "type": "json"
         }
       ]
@@ -7382,7 +7410,7 @@
     "examples": [
       {
         "title": "Example usage:",
-        "content": "var socialInfo = {education: '', completedEducation: '', currentEducation: '', work: '', hoursWork: '', profession: '', livingSituation: '', support: [], sports: [], interests: []};\nthis.http.put('https://health29.org/api/socialinfos/'+socialInfoId, socialInfo)\n .subscribe( (res : any) => {\n   console.log('social info: '+ res.socialInfo);\n  }, (err) => {\n   ...\n  }",
+        "content": "var socialInfo = {education: '', completedEducation: '', currentEducation: '', work: '', hoursWork: '', profession: '', livingSituation: '', support: [], sports: [], othersport: '', interests: [], otherinterest: ''};\nthis.http.put('https://health29.org/api/socialinfos/'+socialInfoId, socialInfo)\n .subscribe( (res : any) => {\n   console.log('social info: '+ res.socialInfo);\n  }, (err) => {\n   ...\n  }",
         "type": "js"
       }
     ],
@@ -7487,6 +7515,13 @@
           },
           {
             "group": "body",
+            "type": "String",
+            "optional": true,
+            "field": "otherinterest",
+            "description": "<p>If interests contains Other</p>"
+          },
+          {
+            "group": "body",
             "type": "String[]",
             "allowedValues": [
               "\"swimming\"",
@@ -7498,6 +7533,13 @@
             "optional": true,
             "field": "sports",
             "description": ""
+          },
+          {
+            "group": "body",
+            "type": "String",
+            "optional": true,
+            "field": "othersport",
+            "description": "<p>If sports contains Other</p>"
           },
           {
             "group": "body",
@@ -7553,7 +7595,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\"socialInfo\":\n  {\n    \"_id\":\"5a6f4b83f660d806744f3ef6\",\n    \"profession\":\"\",\n    \"hoursWork\":\"\",\n    \"work\":\"no\",\n    \"currentEducation\":\"\",\n    \"completedEducation\":\"\",\n    \"education\":\"regularEducation\",\n    \"interests\":[\"gaming\",\"music\"],\n    \"sports\":[\"other\"],\n    \"support\":[\"helpers\",\"friends\"],\n    \"livingSituation\":[\"partner\"]\n  },\n\"message\": \"Social Info updated\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\"socialInfo\":\n  {\n    \"_id\":\"5a6f4b83f660d806744f3ef6\",\n    \"profession\":\"\",\n    \"hoursWork\":\"\",\n    \"work\":\"no\",\n    \"currentEducation\":\"\",\n    \"completedEducation\":\"\",\n    \"education\":\"regularEducation\",\n    \"interests\":[\"gaming\",\"music\"],\n    \"otherinterest\":\"\",\n    \"sports\":[\"other\"],\n    \"othersport\":\"\",\n    \"support\":[\"helpers\",\"friends\"],\n    \"livingSituation\":[\"partner\"]\n  },\n\"message\": \"Social Info updated\"\n}",
           "type": "json"
         }
       ]
