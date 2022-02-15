@@ -56,13 +56,13 @@ const StructureProm = require('../../../models/structure-prom')
  * 		}
  * ]
  */
-function getPromsSection (req, res){
-	let sectionId= req.params.sectionId;
-	Prom.find({"section": sectionId}, function(err, proms) {
+function getPromsSection(req, res) {
+	let sectionId = req.params.sectionId;
+	Prom.find({ "section": sectionId }, function (err, proms) {
 		var listProms = [];
 
-		proms.forEach(function(prom) {
-		listProms.push(prom);
+		proms.forEach(function (prom) {
+			listProms.push(prom);
 		});
 
 		res.status(200).send(listProms)
@@ -120,13 +120,13 @@ function getPromsSection (req, res){
  * ]
  *
  */
-function getPromSection (req, res){
-	let groupId= req.params.promSectionId;
-  	Prom.findOne({ 'createdBy': groupId }, {"createdBy" : false }, function (err, proms) {
-		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-		if(!proms) return res.status(404).send({code: 208, message: 'The proms does not exist'})
+function getPromSection(req, res) {
+	let groupId = req.params.promSectionId;
+	Prom.findOne({ 'createdBy': groupId }, { "createdBy": false }, function (err, proms) {
+		if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
+		if (!proms) return res.status(404).send({ code: 208, message: 'The proms does not exist' })
 
-    //var proms = {data:group.proms};
+		//var proms = {data:group.proms};
 		res.status(200).send(proms)
 	})
 }
@@ -177,139 +177,178 @@ function getPromSection (req, res){
  *			"__v" : 0
  * 		}
  */
-function savePromSection (req, res){
+function savePromSection(req, res) {
 
-  var params= req.params.userIdAndgroupId;
-  params = params.split("-code-");
-  let userId= crypt.decrypt(params[0]);
-  let groupId = params[1];
+	var params = req.params.userIdAndgroupId;
+	params = params.split("-code-");
+	let userId = crypt.decrypt(params[0]);
+	let groupId = params[1];
 
-  User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user)=> {
-    if (err) return res.status(500).send({message: 'Error making the request:'})
-    if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
+	User.findById(userId, { "_id": false, "password": false, "__v": false, "confirmationCode": false, "loginAttempts": false, "confirmed": false, "lastLogin": false }, (err, user) => {
+		if (err) return res.status(500).send({ message: 'Error making the request:' })
+		if (!user) return res.status(404).send({ code: 208, message: 'The user does not exist' })
 
-    if(user.role == 'SuperAdmin'){
-		let prom = new Prom()
-		prom.name = req.body.name
-		prom.responseType = req.body.responseType
-		prom.question = req.body.question
-		prom.values = req.body.values
-		prom.section = req.body.section
-		prom.order = req.body.order
-		prom.periodicity = req.body.periodicity
-		prom.annotations = req.body.annotations
-		prom.isRequired = req.body.isRequired
-		prom.enabled = req.body.enabled
-		prom.width = req.body.width
-		prom.relatedTo = req.body.relatedTo
-		prom.disableDataPoints = req.body.disableDataPoints
-		prom.createdBy = groupId
+		if (user.role == 'SuperAdmin') {
+			let prom = new Prom()
+			prom.name = req.body.name
+			prom.responseType = req.body.responseType
+			prom.question = req.body.question
+			prom.values = req.body.values
+			prom.section = req.body.section
+			prom.order = req.body.order
+			prom.periodicity = req.body.periodicity
+			prom.annotations = req.body.annotations
+			prom.isRequired = req.body.isRequired
+			prom.enabled = req.body.enabled
+			prom.width = req.body.width
+			prom.relatedTo = req.body.relatedTo
+			prom.disableDataPoints = req.body.disableDataPoints
+			prom.createdBy = groupId
 
-		// ordeno los proms por orden
-		Prom.find({section:req.body.section}).sort({ order : 'asc'}).exec((err,promIntheSameSectionFound)=>{
-			// Si hay más proms en la misma sección
-			if(promIntheSameSectionFound.length>0){
+			// ordeno los proms por orden
+			Prom.find({ section: req.body.section }).sort({ order: 'asc' }).exec((err, promIntheSameSectionFound) => {
+				// Si hay más proms en la misma sección
+				if (promIntheSameSectionFound.length > 0) {
 
-				// Me quedo con el orden del nuevo DataPoint
-				var newOrder=req.body.order;
+					// Me quedo con el orden del nuevo DataPoint
+					var newOrder = req.body.order;
 
-				// Comprobar si newOrder existía ya en la lista de proms de la sección
-				var existOrder=false;
-				for(var i=0;i<promIntheSameSectionFound.length;i++){
-					if(promIntheSameSectionFound[i].order==newOrder){
-						existOrder=true;
-					}
-				}
-				if(existOrder==true){
-					// Calculo maxOrder
-					var maxOrder=undefined;
-					for(var i=0;i<promIntheSameSectionFound.length;i++){
-						if(maxOrder==undefined){
-							maxOrder=promIntheSameSectionFound[i].order;
-						}
-						else if(promIntheSameSectionFound[i].order>maxOrder){
-							maxOrder=promIntheSameSectionFound[i].order;
+					// Comprobar si newOrder existía ya en la lista de proms de la sección
+					var existOrder = false;
+					for (var i = 0; i < promIntheSameSectionFound.length; i++) {
+						if (promIntheSameSectionFound[i].order == newOrder) {
+							existOrder = true;
 						}
 					}
-
-					// Si newOrder > maxOrder (el nuevo está "fuera" de la lista)
-					if(newOrder>maxOrder){
-
-						// Se guarda el nuevo dataPoint
-						prom.save((err, promStored)=> {
-							if (err) res.status(500).send({message: `Failed to save in the database: ${err} `})
-							Lang.find({}, function(err, langs) {
-								if(langs!=undefined){
-									langs.forEach(function(lang) {
-										StructureProm.findOne({"createdBy": groupId, "lang": lang.code}, {"createdBy" : false }, (err, structureProm) => {
-											if(structureProm){
-												var enc = false;
-												for (var i = 0; i < structureProm.data.length && !enc; i++) {
-													if(structureProm.data[i].section._id == req.body.section){
-														enc = true;
-														if(prom.values.length>0){
-															for (var k = 0; k < prom.values.length; k++) {
-																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
-															}
-														}
-														var nuwValue = {data: [], structure: prom};
-														(structureProm.data[i].promsStructure).push(nuwValue)
-
-														var promId= structureProm._id
-														StructureProm.findByIdAndUpdate(promId, structureProm, {new: true}, function(err, promUpdated){
-														})
-													}
-												}
-											}
-										})
-									});
-								}
-							});
-							var copypromStored = JSON.parse(JSON.stringify(promStored));
-							delete copypromStored.createdBy;
-							return res.status(200).send({message: 'Prom created', prom: copypromStored})
-
-						})
-					}
-					// Si newOrder < maxOrder (el nuevo está "dentro" de la lista)
-					else if(newOrder<=maxOrder){
-						// busco los datapoints cuyo order >= newOrder
-						var promstoUpdate=[];
-						for(var i=0;i<promIntheSameSectionFound.length;i++){
-							if(promIntheSameSectionFound[i].order>=newOrder){
-								promIntheSameSectionFound[i].order=(promIntheSameSectionFound[i].order+1);
-								promstoUpdate.push({id:promIntheSameSectionFound[i]._id,prom:promIntheSameSectionFound[i]})
+					if (existOrder == true) {
+						// Calculo maxOrder
+						var maxOrder = undefined;
+						for (var i = 0; i < promIntheSameSectionFound.length; i++) {
+							if (maxOrder == undefined) {
+								maxOrder = promIntheSameSectionFound[i].order;
+							}
+							else if (promIntheSameSectionFound[i].order > maxOrder) {
+								maxOrder = promIntheSameSectionFound[i].order;
 							}
 						}
-						// Actualizo los datapoints cuyo order >= newOrder
-						for(var i=0;i<promstoUpdate.length;i++){
-							Prom.findByIdAndUpdate(promstoUpdate[i].id, promstoUpdate[i].prom,{new: false}, (err, promOrderUpdated)=>{
-								if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+
+						// Si newOrder > maxOrder (el nuevo está "fuera" de la lista)
+						if (newOrder > maxOrder) {
+
+							// Se guarda el nuevo dataPoint
+							prom.save((err, promStored) => {
+								if (err) res.status(500).send({ message: `Failed to save in the database: ${err} ` })
+								Lang.find({}, function (err, langs) {
+									if (langs != undefined) {
+										langs.forEach(function (lang) {
+											StructureProm.findOne({ "createdBy": groupId, "lang": lang.code }, { "createdBy": false }, (err, structureProm) => {
+												if (structureProm) {
+													var enc = false;
+													for (var i = 0; i < structureProm.data.length && !enc; i++) {
+														if (structureProm.data[i].section._id == req.body.section) {
+															enc = true;
+															if (prom.values.length > 0) {
+																for (var k = 0; k < prom.values.length; k++) {
+																	prom.values[k] = { original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations }
+																}
+															}
+															var nuwValue = { data: [], structure: prom };
+															(structureProm.data[i].promsStructure).push(nuwValue)
+
+															var promId = structureProm._id
+															StructureProm.findByIdAndUpdate(promId, structureProm, { new: true }, function (err, promUpdated) {
+															})
+														}
+													}
+												}
+											})
+										});
+									}
+								});
+								var copypromStored = JSON.parse(JSON.stringify(promStored));
+								delete copypromStored.createdBy;
+								return res.status(200).send({ message: 'Prom created', prom: copypromStored })
+
 							})
 						}
-						// Guardo el nuevo datapoint
+						// Si newOrder < maxOrder (el nuevo está "dentro" de la lista)
+						else if (newOrder <= maxOrder) {
+							// busco los datapoints cuyo order >= newOrder
+							var promstoUpdate = [];
+							for (var i = 0; i < promIntheSameSectionFound.length; i++) {
+								if (promIntheSameSectionFound[i].order >= newOrder) {
+									promIntheSameSectionFound[i].order = (promIntheSameSectionFound[i].order + 1);
+									promstoUpdate.push({ id: promIntheSameSectionFound[i]._id, prom: promIntheSameSectionFound[i] })
+								}
+							}
+							// Actualizo los datapoints cuyo order >= newOrder
+							for (var i = 0; i < promstoUpdate.length; i++) {
+								Prom.findByIdAndUpdate(promstoUpdate[i].id, promstoUpdate[i].prom, { new: false }, (err, promOrderUpdated) => {
+									if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
+								})
+							}
+							// Guardo el nuevo datapoint
+							// when you save, returns an id in promStored to access that social-info
+							prom.save((err, promStored) => {
+								if (err) res.status(500).send({ message: `Failed to save in the database: ${err} ` })
+								Lang.find({}, function (err, langs) {
+									if (langs != undefined) {
+										langs.forEach(function (lang) {
+											StructureProm.findOne({ "createdBy": groupId, "lang": lang.code }, { "createdBy": false }, (err, structureProm) => {
+												if (structureProm) {
+													var enc = false;
+													for (var i = 0; i < structureProm.data.length && !enc; i++) {
+														if (structureProm.data[i].section._id == req.body.section) {
+															enc = true;
+															if (prom.values.length > 0) {
+																for (var k = 0; k < prom.values.length; k++) {
+																	prom.values[k] = { original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations }
+																}
+															}
+															var nuwValue = { data: [], structure: prom };
+															(structureProm.data[i].promsStructure).push(nuwValue)
+
+															var promId = structureProm._id
+															StructureProm.findByIdAndUpdate(promId, structureProm, { new: true }, function (err, promUpdated) {
+															})
+														}
+													}
+												}
+											})
+										});
+									}
+								});
+								var copypromStored = JSON.parse(JSON.stringify(promStored));
+								delete copypromStored.createdBy;
+								return res.status(200).send({ message: 'Prom created', prom: promStored })
+
+							})
+						}
+					}
+					else {
+						// guardo el nuevo datapoint
 						// when you save, returns an id in promStored to access that social-info
-						prom.save((err, promStored)=> {
-							if (err) res.status(500).send({message: `Failed to save in the database: ${err} `})
-							Lang.find({}, function(err, langs) {
-								if(langs!=undefined){
-									langs.forEach(function(lang) {
-										StructureProm.findOne({"createdBy": groupId, "lang": lang.code}, {"createdBy" : false }, (err, structureProm) => {
-											if(structureProm){
+						prom.save((err, promStored) => {
+							if (err) res.status(500).send({ message: `Failed to save in the database: ${err} ` })
+							Lang.find({}, function (err, langs) {
+								if (langs != undefined) {
+									langs.forEach(function (lang) {
+										StructureProm.findOne({ "createdBy": groupId, "lang": lang.code }, { "createdBy": false }, (err, structureProm) => {
+											if (structureProm) {
 												var enc = false;
 												for (var i = 0; i < structureProm.data.length && !enc; i++) {
-													if(structureProm.data[i].section._id == req.body.section){
+													if (structureProm.data[i].section._id == req.body.section) {
 														enc = true;
-														if(prom.values.length>0){
+														if (prom.values.length > 0) {
 															for (var k = 0; k < prom.values.length; k++) {
-																prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
+																prom.values[k] = { original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations }
 															}
 														}
-														var nuwValue = {data: [], structure: prom};
+														var nuwValue = { data: [], structure: prom };
 														(structureProm.data[i].promsStructure).push(nuwValue)
 
-														var promId= structureProm._id
-														StructureProm.findByIdAndUpdate(promId, structureProm, {new: true}, function(err, promUpdated){
+														var promId = structureProm._id
+														StructureProm.findByIdAndUpdate(promId, structureProm, { new: true }, function (err, promUpdated) {
 														})
 													}
 												}
@@ -320,35 +359,36 @@ function savePromSection (req, res){
 							});
 							var copypromStored = JSON.parse(JSON.stringify(promStored));
 							delete copypromStored.createdBy;
-							return res.status(200).send({message: 'Prom created', prom: promStored})
+							return res.status(200).send({ message: 'Prom created', prom: promStored })
 
 						})
 					}
 				}
-				else{
+				// Si NO hay más proms en la misma sección
+				else {
 					// guardo el nuevo datapoint
 					// when you save, returns an id in promStored to access that social-info
-					prom.save((err, promStored)=> {
-						if (err) res.status(500).send({message: `Failed to save in the database: ${err} `})
-						Lang.find({}, function(err, langs) {
-							if(langs!=undefined){
-								langs.forEach(function(lang) {
-									StructureProm.findOne({"createdBy": groupId, "lang": lang.code}, {"createdBy" : false }, (err, structureProm) => {
-										if(structureProm){
+					prom.save((err, promStored) => {
+						if (err) res.status(500).send({ message: `Failed to save in the database: ${err} ` })
+						Lang.find({}, function (err, langs) {
+							if (langs != undefined) {
+								langs.forEach(function (lang) {
+									StructureProm.findOne({ "createdBy": groupId, "lang": lang.code }, { "createdBy": false }, (err, structureProm) => {
+										if (structureProm) {
 											var enc = false;
 											for (var i = 0; i < structureProm.data.length && !enc; i++) {
-												if(structureProm.data[i].section._id == req.body.section){
+												if (structureProm.data[i].section._id == req.body.section) {
 													enc = true;
-													if(prom.values.length>0){
+													if (prom.values.length > 0) {
 														for (var k = 0; k < prom.values.length; k++) {
-															prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
+															prom.values[k] = { original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations }
 														}
 													}
-													var nuwValue = {data: [], structure: prom};
+													var nuwValue = { data: [], structure: prom };
 													(structureProm.data[i].promsStructure).push(nuwValue)
 
-													var promId= structureProm._id
-													StructureProm.findByIdAndUpdate(promId, structureProm, {new: true}, function(err, promUpdated){
+													var promId = structureProm._id
+													StructureProm.findByIdAndUpdate(promId, structureProm, { new: true }, function (err, promUpdated) {
 													})
 												}
 											}
@@ -359,58 +399,18 @@ function savePromSection (req, res){
 						});
 						var copypromStored = JSON.parse(JSON.stringify(promStored));
 						delete copypromStored.createdBy;
-						return res.status(200).send({message: 'Prom created', prom: promStored})
+						return res.status(200).send({ message: 'Prom created', prom: promStored })
 
 					})
 				}
-			}
-			// Si NO hay más proms en la misma sección
-			else{
-				// guardo el nuevo datapoint
-				// when you save, returns an id in promStored to access that social-info
-				prom.save((err, promStored)=> {
-					if (err) res.status(500).send({message: `Failed to save in the database: ${err} `})
-					Lang.find({}, function(err, langs) {
-						if(langs!=undefined){
-							langs.forEach(function(lang) {
-								StructureProm.findOne({"createdBy": groupId, "lang": lang.code}, {"createdBy" : false }, (err, structureProm) => {
-									if(structureProm){
-										var enc = false;
-										for (var i = 0; i < structureProm.data.length && !enc; i++) {
-											if(structureProm.data[i].section._id == req.body.section){
-												enc = true;
-												if(prom.values.length>0){
-													for (var k = 0; k < prom.values.length; k++) {
-														prom.values[k] = {original: prom.values[k].value, translation: prom.values[k].value, annotations: prom.values[k].annotations}
-													}
-												}
-												var nuwValue = {data: [], structure: prom};
-												(structureProm.data[i].promsStructure).push(nuwValue)
 
-												var promId= structureProm._id
-												StructureProm.findByIdAndUpdate(promId, structureProm, {new: true}, function(err, promUpdated){
-												})
-											}
-										}
-									}
-								})
-							});
-						}
-					});
-					var copypromStored = JSON.parse(JSON.stringify(promStored));
-					delete copypromStored.createdBy;
-					return res.status(200).send({message: 'Prom created', prom: promStored})
+			});
 
-				})
-			}
+		} else {
+			res.status(401).send({ message: 'without permission' })
+		}
 
-		});
-
-    }else{
-      res.status(401).send({message: 'without permission'})
-    }
-
-  })
+	})
 }
 
 /**
@@ -437,175 +437,175 @@ function savePromSection (req, res){
  * 		"message": 'Prom updated'
  * 	}
  */
-function updatePromSection (req, res){
+function updatePromSection(req, res) {
 
-  let userId= crypt.decrypt(req.params.userId);
-  User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
-    if (err) return res.status(500).send({message: 'Error making the request:'})
-    if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
+	let userId = crypt.decrypt(req.params.userId);
+	User.findById(userId, { "_id": false, "password": false, "__v": false, "confirmationCode": false, "loginAttempts": false, "confirmed": false, "lastLogin": false }, (err, user) => {
+		if (err) return res.status(500).send({ message: 'Error making the request:' })
+		if (!user) return res.status(404).send({ code: 208, message: 'The user does not exist' })
 
-    if(user.role == 'SuperAdmin'){
-	  	let promId= req.body._id;
-		let update = req.body
-		let machacar = update.machacar;
-		Prom.find(promId, (err, promold) => {
-			// ordeno los proms por orden:
-			Prom.find({section:req.body.section}).sort({ order : 'asc'}).exec((err,promIntheSameSectionFound)=>{
-				// Si hay más proms en la misma sección
-				if(promIntheSameSectionFound.length>0){
-					var updateOrder=req.body.order;
+		if (user.role == 'SuperAdmin') {
+			let promId = req.body._id;
+			let update = req.body
+			let machacar = update.machacar;
+			Prom.find(promId, (err, promold) => {
+				// ordeno los proms por orden:
+				Prom.find({ section: req.body.section }).sort({ order: 'asc' }).exec((err, promIntheSameSectionFound) => {
+					// Si hay más proms en la misma sección
+					if (promIntheSameSectionFound.length > 0) {
+						var updateOrder = req.body.order;
 
-					// Calculo maxOrder
-					var maxOrder=undefined;
-					for(var i=0;i<promIntheSameSectionFound.length;i++){
-						if(maxOrder==undefined){
-							maxOrder=promIntheSameSectionFound[i].order;
-						}
-						else if(promIntheSameSectionFound[i].order>maxOrder){
-							maxOrder=promIntheSameSectionFound[i].order;
-						}
-					}
-
-					// Calculo previousOrder
-					var previousOrder=undefined;
-					for(var i=0;i<promIntheSameSectionFound.length;i++){
-						if(promIntheSameSectionFound[i]._id==promId){
-							previousOrder=promIntheSameSectionFound[i].order
-						}
-					}
-
-					// Casos
-					var promstoUpdate=[];
-					if(updateOrder>maxOrder){
-						for(var i=0;i<promIntheSameSectionFound.length;i++){
-							if(promIntheSameSectionFound[i].order>previousOrder){
-								promIntheSameSectionFound[i].order=promIntheSameSectionFound[i].order-1;
-								promstoUpdate.push({id:promIntheSameSectionFound[i]._id,prom:promIntheSameSectionFound[i]})
+						// Calculo maxOrder
+						var maxOrder = undefined;
+						for (var i = 0; i < promIntheSameSectionFound.length; i++) {
+							if (maxOrder == undefined) {
+								maxOrder = promIntheSameSectionFound[i].order;
+							}
+							else if (promIntheSameSectionFound[i].order > maxOrder) {
+								maxOrder = promIntheSameSectionFound[i].order;
 							}
 						}
-					}
-					else if(updateOrder<=maxOrder){
-						if(updateOrder<previousOrder){
-							for(var i=0;i<promIntheSameSectionFound.length;i++){
-								if((updateOrder<=promIntheSameSectionFound[i].order)&&(promIntheSameSectionFound[i].order<previousOrder)){
-									promIntheSameSectionFound[i].order=promIntheSameSectionFound[i].order+1;
-									promstoUpdate.push({id:promIntheSameSectionFound[i]._id,prom:promIntheSameSectionFound[i]})
+
+						// Calculo previousOrder
+						var previousOrder = undefined;
+						for (var i = 0; i < promIntheSameSectionFound.length; i++) {
+							if (promIntheSameSectionFound[i]._id == promId) {
+								previousOrder = promIntheSameSectionFound[i].order
+							}
+						}
+
+						// Casos
+						var promstoUpdate = [];
+						if (updateOrder > maxOrder) {
+							for (var i = 0; i < promIntheSameSectionFound.length; i++) {
+								if (promIntheSameSectionFound[i].order > previousOrder) {
+									promIntheSameSectionFound[i].order = promIntheSameSectionFound[i].order - 1;
+									promstoUpdate.push({ id: promIntheSameSectionFound[i]._id, prom: promIntheSameSectionFound[i] })
 								}
 							}
 						}
-						else if(updateOrder>previousOrder){
-							for(var i=0;i<promIntheSameSectionFound.length;i++){
-								if((previousOrder<promIntheSameSectionFound[i].order)&&(promIntheSameSectionFound[i].order<=updateOrder)){
-									promIntheSameSectionFound[i].order=promIntheSameSectionFound[i].order-1;
-										promstoUpdate.push({id:promIntheSameSectionFound[i]._id,prom:promIntheSameSectionFound[i]})
+						else if (updateOrder <= maxOrder) {
+							if (updateOrder < previousOrder) {
+								for (var i = 0; i < promIntheSameSectionFound.length; i++) {
+									if ((updateOrder <= promIntheSameSectionFound[i].order) && (promIntheSameSectionFound[i].order < previousOrder)) {
+										promIntheSameSectionFound[i].order = promIntheSameSectionFound[i].order + 1;
+										promstoUpdate.push({ id: promIntheSameSectionFound[i]._id, prom: promIntheSameSectionFound[i] })
+									}
 								}
 							}
+							else if (updateOrder > previousOrder) {
+								for (var i = 0; i < promIntheSameSectionFound.length; i++) {
+									if ((previousOrder < promIntheSameSectionFound[i].order) && (promIntheSameSectionFound[i].order <= updateOrder)) {
+										promIntheSameSectionFound[i].order = promIntheSameSectionFound[i].order - 1;
+										promstoUpdate.push({ id: promIntheSameSectionFound[i]._id, prom: promIntheSameSectionFound[i] })
+									}
+								}
 
+							}
 						}
-					}
-					for(var i=0;i<promstoUpdate.length;i++){
-						Prom.findByIdAndUpdate(promstoUpdate[i].id, promstoUpdate[i].prom,{new:true}, async function(err, promUpdated){
-							if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-							if(promUpdated){
-								Lang.find({}, async function(err, langs) {
-									if(langs!=undefined){
+						for (var i = 0; i < promstoUpdate.length; i++) {
+							Prom.findByIdAndUpdate(promstoUpdate[i].id, promstoUpdate[i].prom, { new: true }, async function (err, promUpdated) {
+								if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
+								if (promUpdated) {
+									Lang.find({}, async function (err, langs) {
+										if (langs != undefined) {
+											for (var indice = 0; indice < langs.length; indice++) {
+												var resultOtherProms = await processObj(langs[indice], promUpdated, promUpdated.section, promIntheSameSectionFound, machacar);
+											}
+										}
+									});
+								}
+								//return res.status(200).send({message: 'Prom updated'})
+							})
+						}
+						Prom.findByIdAndUpdate(promId, update, { new: true }, async function (err, promUpdated) {
+							if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
+							if (promUpdated) {
+								Lang.find({}, async function (err, langs) {
+									if (langs != undefined) {
 										for (var indice = 0; indice < langs.length; indice++) {
-											var resultOtherProms = await processObj(langs[indice], promUpdated, promUpdated.section, promIntheSameSectionFound, machacar);
+											var result = await processObj(langs[indice], promUpdated, req.body.section, promold, machacar);
 										}
 									}
 								});
 							}
-							//return res.status(200).send({message: 'Prom updated'})
+							return res.status(200).send({ message: 'Prom updated' })
 						})
 					}
-					Prom.findByIdAndUpdate(promId, update, {new: true}, async function(err, promUpdated){
-						if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-						if(promUpdated){
-							Lang.find({}, async function(err, langs) {
-								if(langs!=undefined){
-									for (var indice = 0; indice < langs.length; indice++) {
-										var result = await processObj(langs[indice], promUpdated, req.body.section, promold, machacar);
-									}
-								}
-							});
-						}
-						return res.status(200).send({message: 'Prom updated'})
-					})
-				}
+				})
+
 			})
 
-		})
 
+		} else {
+			res.status(401).send({ message: 'without permission' })
+		}
 
-    }else{
-        res.status(401).send({message: 'without permission'})
-      }
-
-  })
+	})
 
 }
 
-async function processObj(lang, promUpdated, section, promold, machacar){
-	await StructureProm.findOne({"createdBy": promUpdated.createdBy, "lang": lang.code}, {"createdBy" : false }, async function(err, structureProm) {
+async function processObj(lang, promUpdated, section, promold, machacar) {
+	await StructureProm.findOne({ "createdBy": promUpdated.createdBy, "lang": lang.code }, { "createdBy": false }, async function (err, structureProm) {
 		var promUpdatedCopy = JSON.parse(JSON.stringify(promUpdated));
-		if(structureProm){
+		if (structureProm) {
 			var enc = false;
 			for (var i = 0; i < structureProm.data.length && !enc; i++) {
-				if(structureProm.data[i].section._id == section){
+				if (structureProm.data[i].section._id == section) {
 					enc = true;
 					var enc2 = false;
 					for (var j = 0; j < structureProm.data[i].promsStructure.length && !enc2; j++) {
 
 						var par1 = JSON.stringify(structureProm.data[i].promsStructure[j].structure._id);
 						var par2 = JSON.stringify(promUpdated._id);
-						if(par1 == par2){
+						if (par1 == par2) {
 							enc2 = true;
-							if(promUpdated.values.length>0){
+							if (promUpdated.values.length > 0) {
 								//mirar si ha cambiado algún valor, si es así, machacar traduciones
 
 								for (var k = 0; k < promUpdated.values.length; k++) {
-									if(machacar){
-										promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, annotations: promUpdated.values[k].annotations}
-									}else{
-										if(structureProm.data[i].promsStructure[j].structure.values[k]==undefined){
-											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: promUpdated.values[k].value, annotations: promUpdated.values[k].annotations}
-										}else{
-											promUpdatedCopy.values[k] = {original: promUpdated.values[k].value, translation: structureProm.data[i].promsStructure[j].structure.values[k].translation, annotations: promUpdated.values[k].annotations}
+									if (machacar) {
+										promUpdatedCopy.values[k] = { original: promUpdated.values[k].value, translation: promUpdated.values[k].value, annotations: promUpdated.values[k].annotations }
+									} else {
+										if (structureProm.data[i].promsStructure[j].structure.values[k] == undefined) {
+											promUpdatedCopy.values[k] = { original: promUpdated.values[k].value, translation: promUpdated.values[k].value, annotations: promUpdated.values[k].annotations }
+										} else {
+											promUpdatedCopy.values[k] = { original: promUpdated.values[k].value, translation: structureProm.data[i].promsStructure[j].structure.values[k].translation, annotations: promUpdated.values[k].annotations }
 										}
 									}
 
 								}
-							}else{
+							} else {
 								promUpdatedCopy.values = [];
 							}
-							if(promUpdated.question != promold.question){
-								if(!machacar){
-									promUpdatedCopy.question=structureProm.data[i].promsStructure[j].structure.question
-								}else{
+							if (promUpdated.question != promold.question) {
+								if (!machacar) {
+									promUpdatedCopy.question = structureProm.data[i].promsStructure[j].structure.question
+								} else {
 									var saveQuestion = promUpdated.question
 									promUpdatedCopy.question = saveQuestion
 								}
 
-							}else{
-								if(!machacar){
-									promUpdatedCopy.question=structureProm.data[i].promsStructure[j].structure.question
-								}else{
+							} else {
+								if (!machacar) {
+									promUpdatedCopy.question = structureProm.data[i].promsStructure[j].structure.question
+								} else {
 									var saveQuestion = structureProm.data[i].promsStructure[j].structure.question
 									promUpdatedCopy.question = saveQuestion
 								}
 
 							}
 							structureProm.data[i].promsStructure[j].structure = promUpdatedCopy;
-							await StructureProm.findByIdAndUpdate(structureProm._id, structureProm, {new: true}, async function(err, promUpdated2) {
-								return {data:structureProm };
+							await StructureProm.findByIdAndUpdate(structureProm._id, structureProm, { new: true }, async function (err, promUpdated2) {
+								return { data: structureProm };
 							})
 						}
 					}
 
 				}
 			}
-		}else{
-			return {data:'' };
+		} else {
+			return { data: '' };
 		}
 	})
 
@@ -641,52 +641,52 @@ async function processObj(lang, promUpdated, section, promold, machacar){
  * 		"message": 'The prom has been eliminated'
  * 	}
  */
-function deletePromSection (req, res){
-  var params= req.params.userIdAndpromId;
-  params = params.split("-code-");
-  let userId= crypt.decrypt(params[0]);
-  let promId = params[1];
+function deletePromSection(req, res) {
+	var params = req.params.userIdAndpromId;
+	params = params.split("-code-");
+	let userId = crypt.decrypt(params[0]);
+	let promId = params[1];
 	Prom.findById(promId, (err, prom) => {
-		if (err) return res.status(500).send({message: `Error deleting the prom: ${err}`})
-		if(prom){
-			Prom.find({section:prom.section}).sort({ order : 'asc'}).exec((err,promIntheSameSectionFound)=>{
-				if(promIntheSameSectionFound){
-					var updateOrderStructureProm=false;
-					var promstoUpdate=[];
-					for(var i=0;i<promIntheSameSectionFound.length;i++){
+		if (err) return res.status(500).send({ message: `Error deleting the prom: ${err}` })
+		if (prom) {
+			Prom.find({ section: prom.section }).sort({ order: 'asc' }).exec((err, promIntheSameSectionFound) => {
+				if (promIntheSameSectionFound) {
+					var updateOrderStructureProm = false;
+					var promstoUpdate = [];
+					for (var i = 0; i < promIntheSameSectionFound.length; i++) {
 						// Hay que verificar el order: Si ya existe hay que ordenar los demás a partir de este
-						if(promIntheSameSectionFound[i].order>prom.order){
-							updateOrderStructureProm=true;
+						if (promIntheSameSectionFound[i].order > prom.order) {
+							updateOrderStructureProm = true;
 							//promIntheSameSectionFound[i].order=(promIntheSameSectionFound[i].order)-(promIntheSameSectionFound[i].order-prom.order);
-							promIntheSameSectionFound[i].order=(promIntheSameSectionFound[i].order)-1;
-							promstoUpdate.push({id:promIntheSameSectionFound[i]._id,prom:promIntheSameSectionFound[i]})
+							promIntheSameSectionFound[i].order = (promIntheSameSectionFound[i].order) - 1;
+							promstoUpdate.push({ id: promIntheSameSectionFound[i]._id, prom: promIntheSameSectionFound[i] })
 						}
 
 					}
-					for(var i=0;i<promstoUpdate.length;i++){
-						Prom.findByIdAndUpdate(promstoUpdate[i].id, promstoUpdate[i].prom, (err, promOrderUpdated)=>{
-							if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+					for (var i = 0; i < promstoUpdate.length; i++) {
+						Prom.findByIdAndUpdate(promstoUpdate[i].id, promstoUpdate[i].prom, (err, promOrderUpdated) => {
+							if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
 						})
 					}
 					var tempProm = prom;
 					prom.remove(err => {
-						if(err) return res.status(500).send({message: `Error deleting the prom: ${err}`})
-						Lang.find({}, function(err, langs) {
-							if(langs!=undefined){
-								langs.forEach(function(lang) {
-									StructureProm.findOne({"createdBy": prom.createdBy, "lang": lang.code}, {"createdBy" : false }, (err, structureProm) => {
-										if(structureProm){
+						if (err) return res.status(500).send({ message: `Error deleting the prom: ${err}` })
+						Lang.find({}, function (err, langs) {
+							if (langs != undefined) {
+								langs.forEach(function (lang) {
+									StructureProm.findOne({ "createdBy": prom.createdBy, "lang": lang.code }, { "createdBy": false }, (err, structureProm) => {
+										if (structureProm) {
 											var enc = false;
 											for (var i = 0; i < structureProm.data.length && !enc; i++) {
-												if(structureProm.data[i].section._id == prom.section){
+												if (structureProm.data[i].section._id == prom.section) {
 													var enc2 = false;
 													for (var j = 0; j < structureProm.data[i].promsStructure.length && !enc2; j++) {
-														if(structureProm.data[i].promsStructure[j].structure._id==promId){
+														if (structureProm.data[i].promsStructure[j].structure._id == promId) {
 															delete structureProm.data[i].promsStructure[j];
 
 															//eliminate all the null values from the data
-															structureProm.data[i].promsStructure = (structureProm.data[i].promsStructure).filter(function(x) { return x !== null })
-															StructureProm.findByIdAndUpdate(structureProm._id, structureProm, {new: true}, function(err, promUpdated){
+															structureProm.data[i].promsStructure = (structureProm.data[i].promsStructure).filter(function (x) { return x !== null })
+															StructureProm.findByIdAndUpdate(structureProm._id, structureProm, { new: true }, function (err, promUpdated) {
 															})
 															enc2 = true;
 														}
@@ -697,33 +697,33 @@ function deletePromSection (req, res){
 											}
 										}
 									})
-							});
+								});
 							}
-					});
+						});
 
-						res.status(200).send({message: `The prom has been eliminated`})
+						res.status(200).send({ message: `The prom has been eliminated` })
 					})
 				}
-				else{
+				else {
 					var tempProm = prom;
 					prom.remove(err => {
-						if(err) return res.status(500).send({message: `Error deleting the prom: ${err}`})
-						Lang.find({}, function(err, langs) {
-							if(langs!=undefined){
-								langs.forEach(function(lang) {
-									StructureProm.findOne({"createdBy": prom.createdBy, "lang": lang.code}, {"createdBy" : false }, (err, structureProm) => {
-										if(structureProm){
+						if (err) return res.status(500).send({ message: `Error deleting the prom: ${err}` })
+						Lang.find({}, function (err, langs) {
+							if (langs != undefined) {
+								langs.forEach(function (lang) {
+									StructureProm.findOne({ "createdBy": prom.createdBy, "lang": lang.code }, { "createdBy": false }, (err, structureProm) => {
+										if (structureProm) {
 											var enc = false;
 											for (var i = 0; i < structureProm.data.length && !enc; i++) {
-												if(structureProm.data[i].section._id == prom.section){
+												if (structureProm.data[i].section._id == prom.section) {
 													var enc2 = false;
 													for (var j = 0; j < structureProm.data[i].promsStructure.length && !enc2; j++) {
-														if(structureProm.data[i].promsStructure[j].structure._id==promId){
+														if (structureProm.data[i].promsStructure[j].structure._id == promId) {
 															delete structureProm.data[i].promsStructure[j];
 
 															//eliminate all the null values from the data
-															structureProm.data[i].promsStructure = (structureProm.data[i].promsStructure).filter(function(x) { return x !== null })
-															StructureProm.findByIdAndUpdate(structureProm._id, structureProm, {new: true}, function(err, promUpdated){
+															structureProm.data[i].promsStructure = (structureProm.data[i].promsStructure).filter(function (x) { return x !== null })
+															StructureProm.findByIdAndUpdate(structureProm._id, structureProm, { new: true }, function (err, promUpdated) {
 															})
 															enc2 = true;
 														}
@@ -734,103 +734,130 @@ function deletePromSection (req, res){
 											}
 										}
 									})
-							});
+								});
 							}
-					});
+						});
 
-						res.status(200).send({message: `The prom has been eliminated`})
+						res.status(200).send({ message: `The prom has been eliminated` })
 					})
 				}
 			})
-		}else{
-			return res.status(202).send({message: 'The prom does not exist'})
+		} else {
+			return res.status(202).send({ message: 'The prom does not exist' })
 		}
 	})
 
 }
 
-function batchImportPromAnnotations (req, res){
-	let userId= crypt.decrypt(req.params.userId);
-	User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
-	  if (err) return res.status(500).send({message: 'Error making the request:'})
-	  if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
-  
-	  if(user.role == 'SuperAdmin'){
-		  var cont = 0;
-		for (var k = 0; k < req.body.length; k++) {
-			var promId= req.body[k].idProm;
-			var annotations= req.body[k].annotations;
-			Prom.findByIdAndUpdate(promId, { annotations: annotations }, {new: true}, (err, promUpdated) => {
-				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-				if(promUpdated){
-					console.log('updated')
-				}
-				cont++;
-				if(cont==req.body.length-1){
-					return res.status(200).send({message: 'Proms imported'})
-				}
-			})
-		}
-	  }else{
-		  res.status(401).send({message: 'without permission'})
-		}
-  
-	})
-  
-  }
+function batchImportPromAnnotations(req, res) {
+	let userId = crypt.decrypt(req.params.userId);
+	User.findById(userId, { "_id": false, "password": false, "__v": false, "confirmationCode": false, "loginAttempts": false, "confirmed": false, "lastLogin": false }, (err, user) => {
+		if (err) return res.status(500).send({ message: 'Error making the request:' })
+		if (!user) return res.status(404).send({ code: 208, message: 'The user does not exist' })
 
-  function batchImportPromAnnotations2 (req, res){
-	let userId= crypt.decrypt(req.params.userId);
-	User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
-	  if (err) return res.status(500).send({message: 'Error making the request:'})
-	  if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
-  
-	  if(user.role == 'SuperAdmin'){
-		  var cont = 0;
-		for (var k = 0; k < req.body.length; k++) {
-			var promId= req.body[k].idProm;
-			var annotations= req.body[k].annotations;
-			Prom.findById(promId, (err, prom) => {
-				if (err) return res.status(500).send({message: `Error deleting the prom: ${err}`})
-				if(prom){
-					console.log('encontrado');
-					console.log(annotations);
-					Prom.findByIdAndUpdate(prom._id, { annotations: annotations }, {new: true}, (err, promUpdated) => {
-						if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-						if(promUpdated){
-							console.log('updated')
-						}else{
-							console.log('not updated')
-						}
-						cont++;
-						if(cont==req.body.length-1){
-							return res.status(200).send({message: 'Proms imported'})
+		if (user.role == 'SuperAdmin') {
+			var cont = 0;
+			for (var k = 0; k < req.body.length; k++) {
+				var promId = req.body[k].idProm;
+				var annotations = req.body[k].annotations;
+				var valueId = req.body[k].valueId
+
+				if (valueId != '') {
+					Prom.findById(promId, (err, prom) => {
+						if (prom) {
+							for (var k = 0; k < prom.values.length; k++) {
+								if (prom.values[k]._id == valueId) {
+									prom.values[k].annotations = annotations;
+									Prom.findByIdAndUpdate(promId, prom, { new: false }, (err, promUpdated) => {
+										console.log('updated')
+									})
+								}
+							}
+							cont++;
+							if (cont == req.body.length) {
+								return res.status(200).send({ message: 'Proms imported' })
+							}
+						} else {
+							cont++;
+							if (cont == req.body.length) {
+								return res.status(200).send({ message: 'Proms imported' })
+							}
 						}
 					})
-				}else{
-					cont++;
-					if(cont==req.body.length-1){
-						return res.status(200).send({message: 'Proms imported'})
-					}
+				} else {
+					Prom.findByIdAndUpdate(promId, { annotations: annotations }, { new: true }, (err, promUpdated) => {
+						if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
+						if (promUpdated) {
+							console.log('updated')
+						}
+						cont++;
+						if (cont == req.body.length) {
+							return res.status(200).send({ message: 'Proms imported' })
+						}
+					})
 				}
-			})
-			
+
+			}
+		} else {
+			res.status(401).send({ message: 'without permission' })
 		}
-		
-  
-	  }else{
-		  res.status(401).send({message: 'without permission'})
-		}
-  
+
 	})
-  
-  }
+
+}
+
+function batchImportPromAnnotations2(req, res) {
+	let userId = crypt.decrypt(req.params.userId);
+	User.findById(userId, { "_id": false, "password": false, "__v": false, "confirmationCode": false, "loginAttempts": false, "confirmed": false, "lastLogin": false }, (err, user) => {
+		if (err) return res.status(500).send({ message: 'Error making the request:' })
+		if (!user) return res.status(404).send({ code: 208, message: 'The user does not exist' })
+
+		if (user.role == 'SuperAdmin') {
+			var cont = 0;
+			for (var k = 0; k < req.body.length; k++) {
+				var promId = req.body[k].idProm;
+				var annotations = req.body[k].annotations;
+				Prom.findById(promId, (err, prom) => {
+					if (err) return res.status(500).send({ message: `Error deleting the prom: ${err}` })
+					if (prom) {
+						console.log('encontrado');
+						console.log(annotations);
+						Prom.findByIdAndUpdate(prom._id, { annotations: annotations }, { new: true }, (err, promUpdated) => {
+							if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
+							if (promUpdated) {
+								console.log('updated')
+							} else {
+								console.log('not updated')
+							}
+							cont++;
+							if (cont == req.body.length - 1) {
+								return res.status(200).send({ message: 'Proms imported' })
+							}
+						})
+					} else {
+						cont++;
+						if (cont == req.body.length - 1) {
+							return res.status(200).send({ message: 'Proms imported' })
+						}
+					}
+				})
+
+			}
+
+
+		} else {
+			res.status(401).send({ message: 'without permission' })
+		}
+
+	})
+
+}
 
 module.exports = {
-  getPromsSection,
-  getPromSection,
-  savePromSection,
-  updatePromSection,
-  deletePromSection,
-  batchImportPromAnnotations
+	getPromsSection,
+	getPromSection,
+	savePromSection,
+	updatePromSection,
+	deletePromSection,
+	batchImportPromAnnotations
 }

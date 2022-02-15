@@ -17,7 +17,9 @@ const SocialInfoSchema = Schema({
 	livingSituation: Array,
 	support: Array,
 	sports: Array,
+	othersport: { type: String, default: ''},
 	interests: Array,
+	otherinterest: { type: String, default: ''},
 	moreInterests: String,
 	createdBy: { type: Schema.Types.ObjectId, ref: "Patient"}
 })

@@ -306,10 +306,10 @@ function calculeSocialInfoStats(id, resultado,orderSection){
 					socialInfoResult[2] = Math.round((100 * cont)/ 2);
 				}
 				cont = 0;
-				if(socialInfo.interests.length != 0){
+				if(socialInfo.interests.length != 0 || socialInfo.otherinterest != ''){
 					cont++
 				}
-				if(socialInfo.sports.length != 0){
+				if(socialInfo.sports.length != 0 || socialInfo.othersport != ''){
 					cont++
 				}
 				if(socialInfo.moreInterests != undefined && socialInfo.moreInterests != ""){

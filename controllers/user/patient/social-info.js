@@ -36,7 +36,9 @@ const crypt = require('../../../services/crypt')
  * @apiSuccess {String} completedEducation Completed education of the Patient. field can be ...
  * @apiSuccess {string="regularEducation","specialEducation"} education Type of education.
  * @apiSuccess {String[]="gaming","music","sports", "movies", "mindgames", "scouting", "other"} interests
+ * @apiSuccess {String} otherinterest If interests contains Other.
  * @apiSuccess {String[]="swimming","wheelchairHockey","soccer", "hourseRiding", "other"} sports
+ * @apiSuccess {String} othersport If sports contains Other.
  * @apiSuccess {String[]="parent","sibling","helpers", "friends", "helperdog"} support
  * @apiSuccess {String[]="parent","institution","partner", "friend", "independent", "other"} livingSituation
  * @apiSuccessExample Success-Response:
@@ -51,7 +53,9 @@ const crypt = require('../../../services/crypt')
  *     "completedEducation":"",
  *     "education":"regularEducation",
  *     "interests":["gaming","music"],
+ *     "otherinterest":"",
  *     "sports":["other"],
+ *     "othersport":"",
  *     "support":["helpers","friends"],
  *     "livingSituation":["partner"]
  *   }
@@ -83,7 +87,7 @@ function getSocialInfo (req, res){
  * @apiGroup Social info
  * @apiVersion 1.0.0
  * @apiExample {js} Example usage:
- *   var socialInfo = {education: '', completedEducation: '', currentEducation: '', work: '', hoursWork: '', profession: '', livingSituation: '', support: [], sports: [], interests: []};
+ *   var socialInfo = {education: '', completedEducation: '', currentEducation: '', work: '', hoursWork: '', profession: '', livingSituation: '', support: [], sports: [], othersport: '', interests: [], otherinterest: ''};
  *   this.http.post('https://health29.org/api/socialinfos/'+patientId, socialInfo)
  *    .subscribe( (res : any) => {
  *      console.log('social info: '+ res.socialInfo);
@@ -104,7 +108,9 @@ function getSocialInfo (req, res){
  * @apiParam (body) {String} [completedEducation] Completed education of the Patient. field can be ...
  * @apiParam (body) {string="regularEducation","specialEducation"} [education] Type of education.
  * @apiParam (body) {String[]="gaming","music","sports", "movies", "mindgames", "scouting", "other"} [interests]
+ * @apiParam (body) {String} [otherinterest] If interests contains Other
  * @apiParam (body){String[]="swimming","wheelchairHockey","soccer", "hourseRiding", "other"} [sports]
+ * @apiParam (body) {String} [othersport] If sports contains Other
  * @apiParam (body) {String[]="parent","sibling","helpers", "friends", "helperdog"} [support]
  * @apiParam (body) {String[]="parent","institution","partner", "friend", "independent", "other"} [livingSituation]
  * @apiSuccess {Object} socialInfo All the values that you can pass as a parameter, and also the _id that has been assigned to it (Social info unique ID)
@@ -121,7 +127,9 @@ function getSocialInfo (req, res){
  *     "completedEducation":"",
  *     "education":"regularEducation",
  *     "interests":["gaming","music"],
+ *     "otherinterest":"",
  *     "sports":["other"],
+ *     "othersport":"",
  *     "support":["helpers","friends"],
  *     "livingSituation":["partner"]
  *   },
@@ -141,7 +149,9 @@ function saveSocialInfo (req, res){
 	socialInfo.livingSituation = req.body.livingSituation
 	socialInfo.support = req.body.support
 	socialInfo.sports = req.body.sports
+	socialInfo.othersport = req.body.othersport
 	socialInfo.interests = req.body.interests
+	socialInfo.otherinterest = req.body.otherinterest
 	socialInfo.moreInterests = req.body.moreInterests
 	socialInfo.createdBy = patientId
 	// when you save, returns an id in socialInfoStored to access that social-info
@@ -165,7 +175,7 @@ function saveSocialInfo (req, res){
  * @apiGroup Social info
  * @apiVersion 1.0.0
  * @apiExample {js} Example usage:
- *   var socialInfo = {education: '', completedEducation: '', currentEducation: '', work: '', hoursWork: '', profession: '', livingSituation: '', support: [], sports: [], interests: []};
+ *   var socialInfo = {education: '', completedEducation: '', currentEducation: '', work: '', hoursWork: '', profession: '', livingSituation: '', support: [], sports: [], othersport: '', interests: [], otherinterest: ''};
  *   this.http.put('https://health29.org/api/socialinfos/'+socialInfoId, socialInfo)
  *    .subscribe( (res : any) => {
  *      console.log('social info: '+ res.socialInfo);
@@ -186,7 +196,9 @@ function saveSocialInfo (req, res){
  * @apiParam (body) {String} [completedEducation] Completed education of the Patient. field can be ...
  * @apiParam (body) {string="regularEducation","specialEducation"} [education] Type of education.
  * @apiParam (body) {String[]="gaming","music","sports", "movies", "mindgames", "scouting", "other"} [interests]
+ * @apiParam (body) {String} [otherinterest] If interests contains Other
  * @apiParam (body){String[]="swimming","wheelchairHockey","soccer", "hourseRiding", "other"} [sports]
+ * @apiParam (body) {String} [othersport] If sports contains Other
  * @apiParam (body) {String[]="parent","sibling","helpers", "friends", "helperdog"} [support]
  * @apiParam (body) {String[]="parent","institution","partner", "friend", "independent", "other"} [livingSituation]
  * @apiSuccess {Object} socialInfo All the values that you can pass as a parameter, and also the _id that has been assigned to it (Social info unique ID)
@@ -203,7 +215,9 @@ function saveSocialInfo (req, res){
  *     "completedEducation":"",
  *     "education":"regularEducation",
  *     "interests":["gaming","music"],
+ *     "otherinterest":"",
  *     "sports":["other"],
+ *     "othersport":"",
  *     "support":["helpers","friends"],
  *     "livingSituation":["partner"]
  *   },
