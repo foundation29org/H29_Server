@@ -14,6 +14,7 @@ const langCtrl = require('../controllers/all/lang')
 const patientCtrl = require('../controllers/user/patient')
 
 const exportCtrl = require('../controllers/user/patient/export')
+const exportqueriesCtrl = require('../services/queries')
 
 const socialInfoCtrl = require('../controllers/user/patient/social-info')
 const weightCtrl = require('../controllers/user/patient/weight')
@@ -77,6 +78,7 @@ api.delete('/users/:userId', auth(roles.AllLessResearcher), userCtrl.deleteUser)
 api.get('/exportdata/:patientId', auth(roles.All), exportCtrl.exportData)
 api.post('/exportsubgroups', auth(roles.Admin), exportCtrl.exportSubgroups)
 api.get('/sections/group/:groupName', auth(roles.All), exportCtrl.getSectionsGroup)
+api.get('/exportproms/:groupId', exportqueriesCtrl.exportProms)
 
 
 // patient routes, using the controller patient, this controller has methods
