@@ -239,7 +239,7 @@ function updateHeight (req, res){
 						if (err) return res.status(500).send({message: `Error making the request: ${err}`})
 
 						//save in HeightHistory
-						Height.findByIdAndUpdate(heightId, update, {new: true}, (err,heightCreatedBy) => {
+						/*Height.findByIdAndUpdate(heightId, update, {new: true}, (err,heightCreatedBy) => {
 							let heightHistory = new HeightHistory()
 							heightHistory.value = req.body.value
 							heightHistory.technique = req.body.technique
@@ -247,6 +247,13 @@ function updateHeight (req, res){
 							heightHistory.createdBy = patientId
 							heightHistory.save((err, heightHistoryStored) => {
 							})
+						})*/
+						let heightHistory = new HeightHistory()
+						heightHistory.value = req.body.value
+						heightHistory.technique = req.body.technique
+						heightHistory.dateTime = req.body.dateTime
+						heightHistory.createdBy = patientId
+						heightHistory.save((err, heightHistoryStored) => {
 						})
 
 						res.status(200).send({message: 'Height updated', height: heightUpdated})

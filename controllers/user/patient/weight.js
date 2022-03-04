@@ -238,13 +238,19 @@ function updateWeight (req, res){
 						if (err) return res.status(500).send({message: `Error making the request: ${err}`})
 
 						//save in WeightHistory
-						Weight.findByIdAndUpdate(weightId, update, {new: true}, (err,weightCreatedBy) => {
+						/*Weight.findByIdAndUpdate(weightId, update, {new: true}, (err,weightCreatedBy) => {
 							let weightHistory = new WeightHistory()
 							weightHistory.value = req.body.value
 							weightHistory.dateTime = weightUpdated.dateTime
 							weightHistory.createdBy = weightCreatedBy.createdBy
 							weightHistory.save((err, weightHistoryStored) => {
 							})
+						})*/
+						let weightHistory = new WeightHistory()
+						weightHistory.value = req.body.value
+						weightHistory.dateTime = req.body.dateTime
+						weightHistory.createdBy = patientId
+						weightHistory.save((err, weightHistoryStored) => {
 						})
 
 						res.status(200).send({message: 'Weight updated', weight: weightUpdated})
