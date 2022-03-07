@@ -4,7 +4,22 @@
 const mongoose = require ('mongoose');
 const Schema = mongoose.Schema
 
+
 const { conndbaccounts } = require('../db_connect')
+
+const DrugSchema = Schema({
+	name: String,
+	translations: Object,
+	drugsSideEffects: Object,
+	annotations:[]
+})
+
+const MedicationSchema = Schema({
+	adverseEffects: Object,
+	sideEffects: Object,
+	drugs: [DrugSchema]
+}, { _id : false })
+
 
 const GroupSchema = Schema({
 	name: {
@@ -14,7 +29,8 @@ const GroupSchema = Schema({
 	email: String,
 	defaultLang: {type: String, default: 'en'},
 	phenotype: {type: Object, default: []},
-	medications: {type: Object, default: []}
+	//medications: {type: Object, default: []},
+	medications: MedicationSchema
 })
 
 module.exports = conndbaccounts.model('Group',GroupSchema)
