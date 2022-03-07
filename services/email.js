@@ -130,6 +130,8 @@ function sendMailVerifyEmailAndDownloadAuthy (email,adminEmail, randomstring, la
       'support@foundation29.org'
     ];
 
+    var urlImg = client_server+'/assets/img/Health29.png';
+    
     var mailOptions = {
       to: email,
       cc:adminEmail,
@@ -147,7 +149,7 @@ function sendMailVerifyEmailAndDownloadAuthy (email,adminEmail, randomstring, la
       }
     };
 
-    var urlImg = client_server+'/assets/img/Health29.png';
+    
     if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
       urlImg = client_server+'/assets/img/duchenne-medium.png';
 
