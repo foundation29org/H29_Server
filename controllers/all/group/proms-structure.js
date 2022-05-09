@@ -10,14 +10,14 @@ const StructureProm = require('../../../models/structure-prom')
 
 
 /**
- * @api {get} https://health29.org/api/structureproms Get the translations of the proms of a group
+ * @api {get} https://health29.org/api/translationstructureproms Get the translations of the proms of a group
  * @apiName getPromsStructure
  * @apiDescription This method return the translations of the proms of a group in a specific language
  * @apiGroup Groups
  * @apiVersion 1.0.0
  * @apiExample {js} Example usage:
  *   var params = <lang>-code-<groupId>
- *   this.http.get('https://health29.org/api/group/proms'+params)
+ *   this.http.get('https://health29.org/api/translationstructureproms/'+params)
  *    .subscribe( (res : any) => {
  *      console.log('Get translations of the proms of a group in a specific language ok');
  *     }, (err) => {

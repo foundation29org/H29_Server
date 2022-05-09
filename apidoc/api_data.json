@@ -2389,7 +2389,7 @@
   },
   {
     "type": "get",
-    "url": "https://health29.org/api/structureproms",
+    "url": "https://health29.org/api/translationstructureproms",
     "title": "Get the translations of the proms of a group",
     "name": "getPromsStructure",
     "description": "<p>This method return the translations of the proms of a group in a specific language</p>",
@@ -2398,7 +2398,7 @@
     "examples": [
       {
         "title": "Example usage:",
-        "content": "var params = <lang>-code-<groupId>\nthis.http.get('https://health29.org/api/group/proms'+params)\n .subscribe( (res : any) => {\n   console.log('Get translations of the proms of a group in a specific language ok');\n  }, (err) => {\n   ...\n  }",
+        "content": "var params = <lang>-code-<groupId>\nthis.http.get('https://health29.org/api/translationstructureproms/'+params)\n .subscribe( (res : any) => {\n   console.log('Get translations of the proms of a group in a specific language ok');\n  }, (err) => {\n   ...\n  }",
         "type": "js"
       }
     ],
