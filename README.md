@@ -8,7 +8,7 @@ H29 server
 [![Build Status](https://f29.visualstudio.com/Health29/_apis/build/status/pro/H29%20-%20Pro%20-%20server%20-%20CI?repoName=foundation29org%2FH29_Server&branchName=main)](https://f29.visualstudio.com/Health29/_build/latest?definitionId=96&repoName=foundation29org%2FH29_Server&branchName=main)
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
-#### 1. Overview 
+#### 1. Overview
 
 Health29 platform scenarios – main principles
 
