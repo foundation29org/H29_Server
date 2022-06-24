@@ -44,7 +44,8 @@ async function getProm(section, patientId, listSections, listProms, result, res,
 	listSections.push({ listProms, name: section.name, enabled: section.enabled, id: section.id });
 	if (listSections.length == numberofSections) {
 		//Tenemos los datos para todas las secciones
-		result["courseOfDisease"]=listSections;
+		result.push({ data: listSections, name: "courseOfDisease" })
+		//result["courseOfDisease"]=listSections;
 		return result
 	}
 }
@@ -114,25 +115,30 @@ async function getPromData(prom, patientId, res, promData) {
 
 async function exportData(req, res) {
 	let patientId = crypt.decrypt(req.params.patientId);
-	var result = {};
+	//var result = {};
+	var result = [];
 	let date = new Date();
 	var metadata = { date: date };
-	result["metadata"]=metadata;
+	result.push({ data: metadata, name: "metadata" })
+	//result["metadata"]=metadata;
 	// get all patient data
 	Patient.findById(patientId, { "_id": false, "createdBy": false }, (err, patient) => {
 		if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
 		if (patient) {
-			result["patient"]=patient;
+			result.push({ data: patient, name: "patient" })
+			//result["patient"]=patient;
 		}
 		SocialInfo.findOne({ "createdBy": patientId }, { "createdBy": false }, (err, socialInfo) => {
 			if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
 			if (socialInfo) {
-				result["socialInfo"]=socialInfo;
+				result.push({ data: socialInfo, name: "socialInfo" })
+				//result["socialInfo"]=socialInfo;
 			}
 			Height.findOne({ "createdBy": patientId }, { "createdBy": false }, (err, height) => {
 				if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
 				if (height) {
-					result["height"]=height;
+					result.push({ data: height, name: "height" })
+					//result["height"]=height;
 				}
 				HeightHistory.find({ createdBy: patientId }, { "createdBy": false }).sort({ dateTime: 'asc' }).exec(function (err, heights) {
 					if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
@@ -140,12 +146,14 @@ async function exportData(req, res) {
 					heights.forEach(function (height) {
 						listHeights.push(height);
 					});
-					result["heightHistory"]=listHeights;
+					result.push({ data: listHeights, name: "heightHistory" })
+					//result["heightHistory"]=listHeights;
 
 					Weight.findOne({ "createdBy": patientId }, { "createdBy": false }, (err, weight) => {
 						if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
 						if (weight) {
-							result["weight"]=weight;
+							result.push({ data: weight, name: "weight" })
+							//result["weight"]=weight;
 						}
 
 						WeightHistory.find({ createdBy: patientId }, { "createdBy": false }).sort({ dateTime: 'asc' }).exec(function (err, weights) {
@@ -154,7 +162,8 @@ async function exportData(req, res) {
 							weights.forEach(function (weight) {
 								listWeights.push(weight);
 							});
-							result["weightHistory"]=listWeights;
+							result.push({ data: listWeights, name: "weightHistory" })
+							//result["weightHistory"]=listWeights;
 
 							Medication.find({ createdBy: patientId }, { "createdBy": false }).sort({ endDate: 'asc' }).exec(function (err, medications) {
 								if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
@@ -162,7 +171,8 @@ async function exportData(req, res) {
 								medications.forEach(function (medication) {
 									listMedications.push(medication);
 								});
-								result["medication"]=listMedications;
+								result.push({ data: listMedications, name: "medication" })
+								//result["medication"]=listMedications;
 
 								Vaccination.find({ createdBy: patientId }, { "createdBy": false }).sort({ date: 'asc' }).exec(async function (err, vaccinations) {
 									if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
@@ -170,7 +180,8 @@ async function exportData(req, res) {
 									vaccinations.forEach(function (vaccination) {
 										listVaccinations.push(vaccination);
 									});
-									result["vaccination"]=listVaccinations;
+									result.push({ data: listVaccinations, name: "vaccination" })
+									//result["vaccination"]=listVaccinations;
 
 									OtherMedication.find({ createdBy: patientId }, { "createdBy": false }).sort({ endDate: 'asc' }).exec(function (err, medications) {
 										if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
@@ -178,12 +189,14 @@ async function exportData(req, res) {
 										medications.forEach(function (medication) {
 											listMedications.push(medication);
 										});
-										result["otherMedication"]=listMedications;
+										result.push({ data: listMedications, name: "otherMedication" })
+										//result["otherMedication"]=listMedications;
 										
 										Phenotype.findOne({ "createdBy": patientId }, { "createdBy": false }, (err, phenotype) => {
 											if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
 											if (phenotype) {
-												result["phenotype"]=phenotype;
+												result.push({ data: phenotype, name: "phenotype" })
+												//result["phenotype"]=phenotype;
 											}
 
 											PhenotypeHistory.find({ createdBy: patientId }, { "createdBy": false }).sort({ date: 'asc' }).exec(function (err, phenotypeHistory) {
@@ -192,12 +205,14 @@ async function exportData(req, res) {
 												phenotypeHistory.forEach(function (phenotype) {
 													listPhenotypeHistory.push(phenotype);
 												});
-												result["phenotypeHistory"]=listPhenotypeHistory;
+												result.push({ data: listPhenotypeHistory, name: "phenotypeHistory" })
+												//result["phenotypeHistory"]=listPhenotypeHistory;
 
 												Genotype.findOne({ "createdBy": patientId }, { "createdBy": false }, (err, genotype) => {
 													if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
 													if (genotype) {
-														result["genotype"]=genotype;
+														result.push({ data: genotype, name: "genotype" })
+														//result["genotype"]=genotype;
 													}
 													//CoD
 													Patient.findById(patientId, (err, patient) => {
@@ -207,7 +222,8 @@ async function exportData(req, res) {
 															User.findById(p.createdBy, (err, user) => {
 																if (err) return res.status(500).send({ message: `Error deleting the user: ${err}` })
 																if (user) {
-																	result["user"]=user;
+																	result.push({ data: user, name: "user" })
+																	//result["user"]=user;
 																	var u = JSON.parse(JSON.stringify(user));
 																	Group.findOne({ 'name': u.group }, (err, group) => {
 																		if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
@@ -224,7 +240,8 @@ async function exportData(req, res) {
 																							MedicalCare.findOne({ "createdBy": patientId }, { "createdBy": false }, async function (err, medicalCare) {
 																								if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
 																								if (medicalCare) {
-																									result["medicalCare"]=medicalCare;
+																									result.push({ data: medicalCare, name: "medicalCare" })
+																									//result["medicalCare"]=medicalCare;
 																								}
 																								ClinicalTrial.find({ createdBy: patientId }, { "createdBy": false }).sort({ date: 'asc' }).exec(function (err, clinicaltrials) {
 																									if (err) return res.status(500).send({ message: `Error making the request: ${err}` })
@@ -233,7 +250,8 @@ async function exportData(req, res) {
 																									clinicaltrials.forEach(function (clinicalTrial) {
 																										listClinicalTrials.push(clinicalTrial);
 																									});
-																									result["clinicalTrials"]=listClinicalTrials;
+																									result.push({ data: listClinicalTrials, name: "clinicalTrials" })
+																									//result["clinicalTrials"]=listClinicalTrials;
 																									res.status(200).send(data)
 
 																								})
