@@ -2175,7 +2175,7 @@
   },
   {
     "type": "get",
-    "url": "https://health29.org/api/group/proms/:groupName",
+    "url": "https://health29.org/api/group/proms/:groupId",
     "title": "Get Proms Group",
     "name": "getPromSectionGroup",
     "description": "<p>This method return the proms of a group</p>",
@@ -2184,7 +2184,7 @@
     "examples": [
       {
         "title": "Example usage:",
-        "content": "this.http.get('https://health29.org/api/group/proms/'+groupName)\n .subscribe( (res : any) => {\n   console.log('proms: '+ res);\n  }, (err) => {\n   ...\n  }",
+        "content": "this.http.get('https://health29.org/api/group/proms/'+groupId)\n .subscribe( (res : any) => {\n   console.log('proms: '+ res);\n  }, (err) => {\n   ...\n  }",
         "type": "js"
       }
     ],
@@ -2215,7 +2215,7 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "groupName",
+            "field": "groupId",
             "description": "<p>The name of the group of patients. More info here:  <a href=\"#api-Groups-getGroupsNames\">Get groupName</a></p>"
           }
         ]

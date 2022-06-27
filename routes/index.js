@@ -222,7 +222,7 @@ api.put('/group/medications/:userId', auth(roles.SuperAdmin), groupCtrl.updateMe
 
 
 // sections proms for each group
-api.get('/group/sections/:groupId', auth(roles.SuperAdmin), sectionPromsCtrl.getSections)
+api.get('/group/sections/:groupId', sectionPromsCtrl.getSections)
 api.get('/group/section/:promSectionId', auth(roles.SuperAdmin), sectionPromsCtrl.getSection)
 api.post('/group/section/:groupId', auth(roles.SuperAdmin), sectionPromsCtrl.saveSection)
 api.put('/group/section/:promSectionId', auth(roles.SuperAdmin), sectionPromsCtrl.updateSection)
