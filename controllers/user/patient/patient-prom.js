@@ -224,14 +224,14 @@ async function saveOneProm(listPromsChanged, patientId){
 }
 
 /**
- * @api {get} https://health29.org/api/proms/:groupName Get Proms Group
+ * @api {get} https://health29.org/api/proms/:groupId Get Proms Group
  * @apiName getPromsGroup
  * @apiPrivate
  * @apiDescription This method return the proms of a group
  * @apiGroup Groups
  * @apiVersion 1.0.0
  * @apiExample {js} Example usage:
- *   this.http.get('https://health29.org/api/group/proms/'+groupName)
+ *   this.http.get('https://health29.org/api/group/proms/'+groupId)
  *    .subscribe( (res : any) => {
  *      console.log('proms: '+ res);
  *     }, (err) => {
@@ -244,7 +244,7 @@ async function saveOneProm(listPromsChanged, patientId){
  *       "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciPgDIUzI1NiJ9.eyJzdWIiOiI1M2ZlYWQ3YjY1YjM0ZTQ0MGE4YzRhNmUyMzVhNDFjNjEyOThiMWZjYTZjMjXkZTUxMTA9OGVkN2NlODMxYWY3IiwiaWF0IjoxNTIwMzUzMDMwLCJlcHAiOjE1NTE4ODkwMzAsInJvbGUiOiJVc2VyIiwiZ3JvdDEiOiJEdWNoZW5uZSBQYXJlbnQgUHJfrmVjdCBOZXRoZXJsYW5kcyJ9.MloW8eeJ857FY7-vwxJaMDajFmmVStGDcnfHfGJx05k"
  *     }
  *
- * @apiParam {String} groupName The name of the group of patients. More info here:  [Get groupName](#api-Groups-getGroupsNames)
+ * @apiParam {String} groupId The id of the group of patients. More info here:  [Get groupName](#api-Groups-getGroupsNames)
  * @apiSuccess {String} _id Prom unique ID.
  * @apiSuccess {String} name
  * @apiSuccess {string="Text","Number","Date","Time","Toogle","Choise","ChoiseSet"} responseType
