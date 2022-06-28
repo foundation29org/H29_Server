@@ -11,6 +11,7 @@ const { conndbdata } = require('../db_connect')
 
 const PatientPromSchema = Schema({
 	data: Schema.Types.Mixed,
+	metainfo: Schema.Types.Mixed,
 	date: {type: Date, default: Date.now},
 	definitionPromId: { type: Schema.Types.ObjectId, ref: "PromSchema"},
 	createdBy: { type: Schema.Types.ObjectId, ref: "Patient"}
