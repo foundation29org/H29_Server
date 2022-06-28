@@ -108,7 +108,8 @@ async function getInfoProms(listSections, res, patientId){
 		for (var j = 0; j < promsStructure.length; j++) {
 			for (var k = 0; k < promsStructure[j].promsStructure.length; k++) {
 				var res0 = await getInfoProms3(promsStructure[j].promsStructure[k].structure, patientId);
-				promsStructure[j].promsStructure[k].data = res0;
+				promsStructure[j].promsStructure[k].data = res0.infoProm;
+				promsStructure[j].promsStructure[k].metainfo = res0.metainfo;
 			}
 		}
 		res.status(200).send(promsStructure)
@@ -134,10 +135,12 @@ async function getInfoProms2(sectionInfo, patientId){
 
 async function getInfoProms3(prom, patientId){
 	var infoProm = [];
+	var metainfo = [];
 	await PatientProm.findOne({createdBy: patientId, "definitionPromId": prom._id}, {"createdBy" : false }).sort({ date : 'desc'}).exec(function(err, patientprom){
 		if (err) infoProm = [];
 		if (patientprom){
 			infoProm = patientprom.data;
+			metainfo = patientprom.metainfo;
 			if(prom.responseType=='Number'){
 				infoProm = parseInt(infoProm)
 			}
@@ -156,9 +159,8 @@ async function getInfoProms3(prom, patientId){
 
 	});
 
-
-
-	return infoProm;
+	var resp = {infoProm:infoProm, metainfo:metainfo}
+	return resp;
 }
 
 /**
@@ -201,15 +203,19 @@ async function getInfoProms3(prom, patientId){
  * 		"message": 'Proms saved'
  * 	}
  */
-function saveProms (req, res){
+ async function saveProms (req, res){
 	let patientId= crypt.decrypt(req.params.patientId)
 	var listPromsChanged = req.body;
-	var res0 = saveOneProm(listPromsChanged, patientId);
+	var res0 = await saveOneProm(listPromsChanged, patientId);
 	res.status(200).send({message: 'Proms saved'})
 }
 
-async function saveOneProm(listPromsChanged, patientId){
+/*async function saveOneProm(listPromsChanged, patientId){
 	for (var i = 0; i < listPromsChanged.length; i++) {
+
+		Prom.find(listPromsChanged[i].promId, (err, promold) => {
+
+		})
 	var functionDone = false;
 	let patientProm = new PatientProm()
 	patientProm.data = listPromsChanged[i].data
@@ -221,7 +227,69 @@ async function saveOneProm(listPromsChanged, patientId){
 		})
 	}
 	return functionDone
+}*/
+
+async function saveOneProm(listPromsChanged, patientId) {
+	return new Promise(async function (resolve, reject) {
+
+                var promises = [];
+                for (var i = 0; i < listPromsChanged.length; i++) {
+                    promises.push(saveInfoOneProm(listPromsChanged[i], patientId));
+                }
+                await Promise.all(promises)
+                    .then(async function (data) {
+                        console.log(data);
+                        console.log('termina')
+                        resolve(data)
+                    })
+                    .catch(function (err) {
+                        console.log('Manejar promesa rechazada (' + err + ') aquí.');
+                        reject('Manejar promesa rechazada (' + err + ') aquí.');
+                    });
+
+		
+
+	});
 }
+
+function saveInfoOneProm(prominfo, patientId) {
+    return new Promise(async function (resolve, reject) {
+		Prom.findById(prominfo.promId, async (err, promold) => {
+			if(err){
+				console.log(err)
+			}
+			var id_answers = [];
+			if(promold.values.length>0){
+				for (var i = 0; i < promold.values.length; i++) {
+						var isArray = Array.isArray(prominfo.data)
+						if(isArray){
+							for (var j = 0; j < prominfo.data.length; j++) {
+								if(promold.values[i].value==prominfo.data[j]){
+									id_answers.push({idanswer: promold.values[i]._id, value: prominfo.data[j]});
+								}
+							}
+						}else{
+							if(promold.values[i].value==prominfo.data){
+								id_answers.push({idanswer: promold.values[i]._id, value: prominfo.data});
+							}
+						}
+
+				}
+			}
+			let patientProm = new PatientProm()
+			patientProm.data = prominfo.data
+			patientProm.definitionPromId = prominfo.promId
+			patientProm.metainfo = id_answers
+			patientProm.createdBy = patientId
+			// when you save, returns an id in socialInfoStored to access that social-info
+			await patientProm.save((err, patientPromStored) => {
+				resolve(patientPromStored)
+			})
+		})
+    });
+	
+}
+
 
 /**
  * @api {get} https://health29.org/api/proms/:groupId Get Proms Group
@@ -338,7 +406,7 @@ function getPromHistory (req, res){
     var listProms = [];
     if(promsFound){
       promsFound.forEach(function(prom) {
-        listProms.push({data: prom.data, date: prom.date});
+        listProms.push({data: prom.data, date: prom.date, metainfo: prom.metainfo});
       });
     }
     res.status(200).send(listProms)
