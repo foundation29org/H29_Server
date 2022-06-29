@@ -80,6 +80,8 @@ api.post('/exportsubgroups', auth(roles.Admin), exportCtrl.exportSubgroups)
 api.get('/sections/group/:groupName', auth(roles.All), exportCtrl.getSectionsGroup)
 api.get('/exportproms/:groupId', exportqueriesCtrl.exportProms)
 
+api.get('/migrate', exportqueriesCtrl.migrate)
+
 
 // patient routes, using the controller patient, this controller has methods
 api.get('/patients-all/:userId', auth(roles.All), patientCtrl.getPatientsUser)

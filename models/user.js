@@ -168,7 +168,7 @@ UserSchema.statics.getAuthenticated = function(email, password, cb) {
                 return cb(null, null, reasons.PASSWORD_INCORRECT);
             });
         });
-    }).select('_id email +password loginAttempts lockUntil confirmed lastLogin role userName lang randomCodeRecoverPass dateTimeRecoverPass group blockedaccount permissions');
+    }).select('_id email +password loginAttempts lockUntil confirmed lastLogin role userName lang randomCodeRecoverPass dateTimeRecoverPass group subgroup blockedaccount permissions');
 };
 
 module.exports = conndbaccounts.model('User',UserSchema)

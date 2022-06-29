@@ -17,7 +17,8 @@ function createToken (user){
 		iat: moment().unix(),
 		exp: moment().add(1, 'years').unix(),//years //minutes
 		role: user.role,
-		group: user.group
+		group: user.group,
+		subgroup: user.subgroup
 	}
 	return jwt.encode(payload, config.SECRET_TOKEN)
 }
