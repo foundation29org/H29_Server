@@ -627,8 +627,12 @@ function signIn(req, res){
 							// Si si que se habia hecho en el mismo mes y con la misma IP entonces OK (no se pide)
 							if(Date.parse(userFound.lastLogin.getMonth())==Date.parse(date.getMonth())){
 								var showPopup=false;
-								if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
-									showPopup = true;
+								if(user.group=='Duchenne Parent Project International' && user.signupDate.getTime() < '1646396616000'){
+									if(user.termsAccepted==undefined){
+										showPopup = true;
+									}else if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
+										showPopup = true;
+									}
 								}
 								return res.status(200).send({
 									message: 'You have successfully logged in',
@@ -667,8 +671,12 @@ function signIn(req, res){
 				// Si no es de Duchenne no se requiere 2FA y el usuario esta Logado OK
 				else{
 					var showPopup=false;
-					if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
-						showPopup = true;
+					if(user.group=='Duchenne Parent Project International' && user.signupDate.getTime() < '1646396616000'){
+						if(user.termsAccepted==undefined){
+							showPopup = true;
+						}else if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
+							showPopup = true;
+						}
 					}
 					return res.status(200).send({
 						message: 'You have successfully logged in',
@@ -999,8 +1007,12 @@ function signin2FA(req,res){
 							// login was successful if we have a user
 							if (user) {
 								var showPopup=false;
-								if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
-									showPopup = true;
+								if(user.group=='Duchenne Parent Project International' && user.signupDate.getTime() < '1646396616000'){
+									if(user.termsAccepted==undefined){
+										showPopup = true;
+									}else if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
+										showPopup = true;
+									}
 								}
 								return res.status(200).send({
 									message: 'You have successfully logged in',
