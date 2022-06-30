@@ -20,6 +20,12 @@ const ParentSchema = Schema({
 	profession: String
 })
 
+const TermsSchema = Schema({
+	displayed: {type: Boolean, default: false},
+	conditionAccepted: {type: Boolean, default: false},
+	date: {type: Date, default: Date.now}
+})
+
 const UserSchema = Schema({
 	email: {
 		type: String,
@@ -51,6 +57,10 @@ const UserSchema = Schema({
 	platform: {type: String, default: ''},
 	authyId:{type:String,default:null},
 	authyDeviceId:{type:Object,default:[]},
+	termsAccepted: {type: TermsSchema, default: {
+		displayed: false,
+		conditionAccepted: false
+	}},
 	phone: String,
 	subgroup: Number,
 })
@@ -168,7 +178,7 @@ UserSchema.statics.getAuthenticated = function(email, password, cb) {
                 return cb(null, null, reasons.PASSWORD_INCORRECT);
             });
         });
-    }).select('_id email +password loginAttempts lockUntil confirmed lastLogin role userName lang randomCodeRecoverPass dateTimeRecoverPass group subgroup blockedaccount permissions');
+    }).select('_id email +password loginAttempts lockUntil confirmed lastLogin role userName lang randomCodeRecoverPass dateTimeRecoverPass group subgroup blockedaccount permissions, termsAccepted');
 };
 
 module.exports = conndbaccounts.model('User',UserSchema)

@@ -626,10 +626,15 @@ function signIn(req, res){
 
 							// Si si que se habia hecho en el mismo mes y con la misma IP entonces OK (no se pide)
 							if(Date.parse(userFound.lastLogin.getMonth())==Date.parse(date.getMonth())){
+								var showPopup=false;
+								if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
+									showPopup = true;
+								}
 								return res.status(200).send({
 									message: 'You have successfully logged in',
 									token: serviceAuth.createToken(user),
-									lang: user.lang
+									lang: user.lang,
+									showPopup: showPopup
 								})
 							}
 							// Si aun no se habia hecho login, pido autorizacion a Authy y elimino la IP de la lista de dispositivos del usuario
@@ -661,10 +666,15 @@ function signIn(req, res){
 				}
 				// Si no es de Duchenne no se requiere 2FA y el usuario esta Logado OK
 				else{
+					var showPopup=false;
+					if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
+						showPopup = true;
+					}
 					return res.status(200).send({
 						message: 'You have successfully logged in',
 						token: serviceAuth.createToken(user),
-						lang: user.lang
+						lang: user.lang,
+						showPopup: showPopup
 					})
 				}
 			});
@@ -988,10 +998,15 @@ function signin2FA(req,res){
 							if (err) {return res.status(500).send({ message: err })}
 							// login was successful if we have a user
 							if (user) {
+								var showPopup=false;
+								if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
+									showPopup = true;
+								}
 								return res.status(200).send({
 									message: 'You have successfully logged in',
 									token: serviceAuth.createToken(user),
-									lang: user.lang
+									lang: user.lang,
+									showPopup: showPopup
 								})
 							}else{
 								return res.status(200).send({ message: reason })
@@ -1232,6 +1247,17 @@ function deleteUser (req, res){
 	})
 }
 
+function changeTerms (req, res){
+	let userId= crypt.decrypt(req.params.userId);
+	var date1 = new Date()
+	var info = {displayed: true, conditionAccepted: req.body.value, date: date1};
+	User.findByIdAndUpdate(userId, {termsAccepted: info}, {select: '-_id userName lang email signupDate massunit lengthunit modules', new: true}, (err, userUpdated) => {
+		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+
+		res.status(200).send({ message: 'Changed'})
+	})
+}
+
 module.exports = {
 	activateUser,
 	recoverPass,
@@ -1244,5 +1270,6 @@ module.exports = {
 	getUser,
 	getSettings,
 	updateUser,
-	deleteUser
+	deleteUser,
+	changeTerms
 }
