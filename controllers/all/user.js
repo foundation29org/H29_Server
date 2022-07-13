@@ -627,7 +627,7 @@ function signIn(req, res){
 							// Si si que se habia hecho en el mismo mes y con la misma IP entonces OK (no se pide)
 							if(Date.parse(userFound.lastLogin.getMonth())==Date.parse(date.getMonth())){
 								var showPopup=false;
-								if(user.group=='Duchenne Parent Project International' && user.signupDate.getTime() < '1646396616000'){
+								if(user.group=='Duchenne Parent Project International' && user.signupDate.getTime() < '1646396616000' && user.role=='User'){
 									if(user.termsAccepted==undefined){
 										showPopup = true;
 									}else if(!user.termsAccepted.displayed && !user.termsAccepted.conditionAccepted){
