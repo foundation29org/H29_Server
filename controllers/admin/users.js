@@ -198,6 +198,7 @@ function getUsers (req, res){
 								var signupDate = null;
 								var userName = '';
 								var userId = '';
+								var conditionAccepted = false;
 								var blockedaccount = false;
 								var subgroup = '';
 								for(var j = 0; j < tempusers.length && !enc; j++) {
@@ -209,10 +210,11 @@ function getUsers (req, res){
 										userId = crypt.encrypt(idUserDecrypt);
 										blockedaccount = tempusers[j].blockedaccount
 										subgroup = tempusers[j].subgroup
+										conditionAccepted = tempusers[j].termsAccepted.conditionAccepted
 										enc = true;
 									}
 								}
-								listUsers.push({userId: userId, userName: userName, email: userEmail, signupDate: signupDate, blockedaccount: blockedaccount, patientId:idencrypt, patientName: u.patientName, surname: u.surname, death: u.death, notes: u.notes, country: u.country, subgroup: subgroup});
+								listUsers.push({userId: userId, userName: userName, email: userEmail, conditionAccepted: conditionAccepted,signupDate: signupDate, blockedaccount: blockedaccount, patientId:idencrypt, patientName: u.patientName, surname: u.surname, death: u.death, notes: u.notes, country: u.country, subgroup: subgroup});
 								patientsAddded++;
 							});
 						}else{
