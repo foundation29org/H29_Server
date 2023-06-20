@@ -4,7 +4,7 @@
 // add the bot-qna model
 const Bot = require('../../models/bot')
 const User = require('../../models/user')
-
+const crypt = require('../../services/crypt')
 
 // add other required models
 const Group = require('../../models/group')
@@ -244,7 +244,10 @@ function updateBotData(req,res){
  */
 async function sendAndSaveFeedback (req, res){
     await saveFeedback(req, res);
-    sendFeedback(req, res);
+    if(req.body.data.value=="No"){
+        sendFeedback(req, res);
+    }
+    
 
 }
 function sendFeedback (req, res){
@@ -254,21 +257,25 @@ function sendFeedback (req, res){
     let data = req.body.data; //Informacion en formato JSON
     let user = req.body.user;
     let userEmail ="";
-    User.findOne({ userName: user }, function(err, userFound) {
+    let userName ="";
+    if(req.body.user.length > 26){
+        user = crypt.decrypt(req.body.user)
+    }
+    User.findById(user, function(err, userFound) {
         if(userFound){
             userEmail = userFound.email;
+            userName = userFound.userName;
         }
-        // Descifrar el JSON
-        let score = data[0].answers[0].score;
-        let question = data[0].answers[0].questions;
-        let answer = data[0].answers[0].answer;
-        let userQuestion = data[1].userQuestion;
         Group.findById(groupId,{"_id" : false },function(err, group) {
-            if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-            if(!group) return res.status(202).send({message: `The group does not exist`})
+            if (err) {
+                console.log(`Error making the request: ${err}`)
+            }
+            if(!group) {
+                console.log(`The group does not exist`)
+            }
             if (group){
                 // send an email to the admins
-                return serviceEmail.sendMailrequestNewFAQ(user,userEmail,group, lang, data);
+                return serviceEmail.sendMailrequestNewFAQ(userName,userEmail,group, lang, data);
             }
         })
     });
@@ -281,17 +288,6 @@ async function saveFeedback(req, res){
     let groupId= req.params.groupId; // Para buscar el mail del admin
     let lang = req.body.lang; // Para enviar el mail
     let data = req.body.data; //Informacion en formato JSON
-
-    // Descifrar el JSON
-    let score = data[0].answers[0].score;
-    let question = data[0].answers[0].questions;
-    let answer = data[0].answers[0].answer;
-    let userQuestion = data[1].userQuestion;
-
-    let doSave = false;
-    let existBot=false;
-
-
     await Group.findById(groupId,{"_id" : false },async function(err, group) {
 
         if (err) return res.status(500).send({message: `Error making the request: ${err}`})

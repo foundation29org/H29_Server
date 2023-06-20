@@ -457,10 +457,8 @@ function sendMailSupport (email, lang, role, supportStored, emailTo){
   return decoded
 }
 function sendMailrequestNewFAQ (user,userEmail,group, lang, jsonData){
-  let score = jsonData[0].answers[0].score;
-  let question = jsonData[0].answers[0].questions;
-  let answer = jsonData[0].answers[0].answer;
-  let userQuestion = jsonData[1].userQuestion;
+  let answer = jsonData.answer;
+  let userQuestion = jsonData.userQuestion;
   let groupMail = group.mail;
   let userName=user;
   let userMail=userEmail;
@@ -479,22 +477,6 @@ function sendMailrequestNewFAQ (user,userEmail,group, lang, jsonData){
       case "nl":
         language="Neederlands";
         break;
-    }
-
-    var questionList="";
-    if((answer=="No good match found in KB.")||(question=="")){
-      questionList="None";
-    }
-    else{
-      questionList=question;
-    }
-
-    var answerList="";
-    if((answer=="No good match found in KB.")||(answer=="")){
-      answerList="None";
-    }
-    else{
-      answerList=answer;
     }
 
     var maillistbcc = [];
@@ -519,8 +501,7 @@ function sendMailrequestNewFAQ (user,userEmail,group, lang, jsonData){
         user : {"name":userName,"mail":userMail},
         lang : language,
         userQuestion: userQuestion,
-        question : questionList,
-        answer : answerList,
+        answer : answer,
       }
     };
     transporter.sendMail(mailOptions, function(error, info){
