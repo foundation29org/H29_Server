@@ -10,7 +10,8 @@ var options = {
      viewEngine: {
          extname: '.hbs',
          layoutsDir: 'views/email/',
-         defaultLayout : 'template'
+         defaultLayout : 'template',
+         partialsDir : 'views/email/partials/'
      },
      viewPath: 'views/email/',
      extName: '.hbs'
