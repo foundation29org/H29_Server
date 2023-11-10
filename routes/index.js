@@ -49,6 +49,8 @@ const f29gatewayCtrl = require('../services/f29gateway')
 
 const f29azureserviceCtrl = require('../services/f29azure')
 
+const bookCtrl = require('../services/book')
+
 const auth = require('../middlewares/auth')
 const roles = require('../middlewares/roles')
 
@@ -312,6 +314,8 @@ api.get('/getAzureBlobSasTokenRead/:containerName',auth(roles.All), f29azureserv
 
 //gateway
 api.post('/gateway/search/symptoms/', f29gatewayCtrl.searchSymptoms)
+
+api.post('/callbook', auth(roles.All), bookCtrl.callBook)
 
 //ruta privada
 api.get('/private', auth(roles.AllLessResearcher), (req, res) => {
