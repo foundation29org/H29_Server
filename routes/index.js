@@ -179,7 +179,7 @@ api.put('/admin/users/subgroup/:userId', auth(roles.Admin), admninUsersCtrl.setS
 api.put('/admin/users/state/:userId', auth(roles.Admin), admninUsersCtrl.setStateUser)
 
 api.get('/admin/stats/:groupNameAndGroupIdAndLang', auth(roles.Admin), admninStatsCtrl.getUsers)
-api.get('/admin/stats/translateCoDSections/:groupIdAndLangAndListSections',auth(roles.Admin),admninStatsCtrl.translateCoDSectionsStats)
+api.post('/admin/stats/translateCoDSections/:groupIdAndLangAndListSections',auth(roles.Admin),admninStatsCtrl.translateCoDSectionsStats)
 
 api.post('/admin/answers/getanswer', auth(roles.UserResearcher), admninAnswersCtrl.getAnswers)
 api.post('/admin/answers/setanswers', auth(roles.OnlyUser), admninAnswersCtrl.setAnswers)

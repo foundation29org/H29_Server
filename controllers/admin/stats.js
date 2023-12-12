@@ -652,14 +652,15 @@ function translateCoDSectionsStats(req,res){
 	let paramsSplit = params.split("-code-")
 	let groupId= paramsSplit[0]
 	let lang=paramsSplit[1]
-	let listSections=JSON.parse(paramsSplit[2])
+	let sections = req.body.sections;
+	let listSections=sections;
 	var result=[];
 	StructureProm.findOne({"createdBy": groupId, "lang": lang}, {"createdBy" : false }, (err, structureProm)=> {
 		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
 		if(!structureProm) return res.status(202).send({message: 'There are no structureProm'})
 		for (var i = 0; i < structureProm.data.length; i++) {
 			if(structureProm.data[i]!=undefined){
-				listSections[0].data.forEach((section)=>{
+				listSections.forEach((section)=>{
 					if(section.id==structureProm.data[i].section._id){
 						result.push({originalSection:section.name, translatedSection: structureProm.data[i].section.name});
 					}
