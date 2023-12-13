@@ -13,6 +13,7 @@ const ClinicalTrialSchema = Schema({
 	drugName: String,
 	center: String,
 	date: Date,
+	endDate: Date,
 	createdBy: { type: Schema.Types.ObjectId, ref: "Patient"}
 })
 

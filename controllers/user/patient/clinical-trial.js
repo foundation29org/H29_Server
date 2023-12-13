@@ -121,6 +121,7 @@ function saveClinicalTrial (req, res){
 	clinicalTrial.drugName = req.body.drugName
 	clinicalTrial.center = req.body.center
 	clinicalTrial.date = req.body.date
+	clinicalTrial.endDate = req.body.endDate
 	clinicalTrial.createdBy = patientId
 	// when you save, returns an id in clinicalTrialStored to access that social-info
 	clinicalTrial.save((err, clinicalTrialStored) => {
