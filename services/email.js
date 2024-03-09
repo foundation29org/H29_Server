@@ -522,6 +522,56 @@ function sendMailrequestNewFAQ (user,userEmail,group, lang, jsonData){
   return decoded
 }
 
+function sendEmailLogin (email, randomstring, group, lang){
+  var subject='Your verification code is';
+  if(lang=='es'){
+    subject='Tu código de verificación es';
+  }else if(lang=='nl'){
+    subject='Uw verificatiecode is';
+  }
+  subject = subject + ' ' + randomstring;
+  const decoded = new Promise((resolve, reject) => {
+
+    var maillistbcc = [
+      'support@foundation29.org',
+    ];
+    console.log(group)
+    var urlImg = client_server+'/assets/img/health29-medium.png';
+    urlImg = 'https://health29-dev.azurewebsites.net/assets/img/health29-medium.png';
+    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
+      //urlImg = client_server+'/assets/img/logo1.png';
+      urlImg = 'https://health29-dev.azurewebsites.net/assets/img/logo1.png';
+    }
+    var mailOptions = {
+      to: email,
+      from:'support@foundation29.org',
+      subject: subject,
+      template: 'login_pass/_'+lang,
+      context: {
+        client_server : client_server,
+        email : email,
+        key : randomstring,
+        urlImg : urlImg
+      }
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+        reject({
+          status: 401,
+          message: 'Fail sending email'
+        })
+      } else {
+        console.log('Email sent: ' + info.response);
+        resolve("ok")
+      }
+    });
+
+  });
+  return decoded
+}
+
 
 module.exports = {
   sendMailVerifyEmail,
@@ -531,5 +581,6 @@ module.exports = {
   sendMailRequestNewLanguage,
   sendMailRequestNewTranslation,
   sendMailSupport,
-  sendMailrequestNewFAQ
+  sendMailrequestNewFAQ,
+  sendEmailLogin
 }

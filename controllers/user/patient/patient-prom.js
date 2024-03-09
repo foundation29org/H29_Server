@@ -97,40 +97,66 @@ function getDataPromsSection (req, res){
 async function getInfoProms(listSections, res, patientId){
 	var promsStructure = [];
 	if(listSections.length>0){
-		for (var i = 0; i < listSections.length; i++) {
-			if(listSections[i].enabled){
-					var res0 = await getInfoProms2(listSections[i], patientId);
-					if(res0!=undefined){
-						promsStructure.push({section:listSections[i], promsStructure:res0})
-					}
-			}
+		try {
+			const promises = listSections
+            .filter(section => section.enabled)
+            .map(section => getInfoProms2(section));
+
+			const results = await Promise.all(promises);
+
+			promsStructure = results
+				.filter(res0 => res0 !== undefined)
+				.map((res0, index) => {
+					return { section: listSections[index], promsStructure: res0 };
+				});
+		} catch (error) {
+			
 		}
-		for (var j = 0; j < promsStructure.length; j++) {
-			for (var k = 0; k < promsStructure[j].promsStructure.length; k++) {
-				var res0 = await getInfoProms3(promsStructure[j].promsStructure[k].structure, patientId);
-				promsStructure[j].promsStructure[k].data = res0.infoProm;
-				promsStructure[j].promsStructure[k].metainfo = res0.metainfo;
-			}
+		try {
+			promsStructure = await processPromsStructure(promsStructure, patientId);
+			console.log('tengo proms data')
+			res.status(200).send(promsStructure);
+		} catch (err) {
+			res.status(200).send(promsStructure)
 		}
-		res.status(200).send(promsStructure)
 	}else{
 		res.status(200).send(promsStructure)
 	}
 
 }
 
-async function getInfoProms2(sectionInfo, patientId){
-	var listProms = [];
-	await Prom.find({"section": sectionInfo._id}, {"createdBy" : false }, function(err, proms) {
+async function getInfoProms2(sectionInfo){
+	try {
+		var listProms = [];
+		var proms = await Prom.find({"section": sectionInfo._id}, {"createdBy" : false });
 		proms.forEach(function(prom) {
 			if(prom.enabled){
-				//var res2 = await getInfoProms3(prom, patientId)
-
 				listProms.push({structure:prom , data:{}})
 			}
 		});
-	});
-	return listProms
+		return listProms;
+	} catch (err) {
+		return [];
+	}
+}
+
+
+async function processPromsStructure(promsStructure, patientId) {
+    try {
+        const promises = promsStructure.flatMap(section => 
+            section.promsStructure.map(prom => 
+                getInfoProms3(prom.structure, patientId).then(res0 => {
+                    prom.data = res0.infoProm;
+                    prom.metainfo = res0.metainfo;
+                })
+            )
+        );
+        await Promise.all(promises);
+
+        return promsStructure;
+    } catch (err) {
+        throw err;
+    }
 }
 
 async function getInfoProms3(prom, patientId){
@@ -209,25 +235,6 @@ async function getInfoProms3(prom, patientId){
 	var res0 = await saveOneProm(listPromsChanged, patientId);
 	res.status(200).send({message: 'Proms saved'})
 }
-
-/*async function saveOneProm(listPromsChanged, patientId){
-	for (var i = 0; i < listPromsChanged.length; i++) {
-
-		Prom.find(listPromsChanged[i].promId, (err, promold) => {
-
-		})
-	var functionDone = false;
-	let patientProm = new PatientProm()
-	patientProm.data = listPromsChanged[i].data
-	patientProm.definitionPromId = listPromsChanged[i].promId
-	patientProm.createdBy = patientId
-	// when you save, returns an id in socialInfoStored to access that social-info
-	await patientProm.save((err, patientPromStored) => {
-		functionDone = true;
-		})
-	}
-	return functionDone
-}*/
 
 async function saveOneProm(listPromsChanged, patientId) {
 	return new Promise(async function (resolve, reject) {

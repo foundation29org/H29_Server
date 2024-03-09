@@ -354,7 +354,6 @@ function setSubgroupUser (req, res){
  * HTTP/1.1 200 OK
  * 		{
  * 			"email": <user email>,
- * 			"password": <user password encrypted>,
  * 			"role": 'User',
  * 			"group": <group name>,
  * 			"confirmed": true,
