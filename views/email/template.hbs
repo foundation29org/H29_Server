@@ -1,15 +1,54 @@
 <html>
   <head>
+  <style>
+    .contentBody {
+      max-width: 500px !important;
+      margin: auto;
+      display: block;
+    }
 
+    .templateCode{
+      font-family: Arial, sans-serif;
+      text-align: center;
+      color: #333;
+      width: 100%;
+    }
+    .code-box {
+        background-color: #363636;
+        color: #fff;
+        font-size: 2em; /* Controla el tamaño de los dígitos */
+        width: auto; /* Auto width based on content size */
+        padding: 20px 10px; /* Top and bottom padding 20px, left and right padding 10px */
+        display: inline-block;
+        margin: 20px;
+        line-height: 1.2; /* Esto aumentará la altura sin cambiar el padding */
+        min-width: 140px; /* Puedes ajustar esto para tener un mínimo de ancho */
+        box-sizing: border-box; /* Asegura que el padding no añada al width total */
+        border-radius: 5px; /* Opcional: Para bordes redondeados */
+    }
+
+        .footer-text {
+            font-size: 0.8em;
+            color: #666;
+            text-align: center;
+        }
+       .templateCode img {
+          max-width: 100px !important; /* Uso de !important para forzar la prioridad */
+          height: auto !important;
+        }
+  </style>
   </head>
 <body>
-  <div style="text-align:left;">
+  <div class="contentBody">
+    <div class="templateCode">
     {{{body}}}
   </div>
+  </div>
+   
 </body>
   <footer>
-    <div style="text-align:left; margin-top: 3em;">
-      <h4 style="color: #f49c20;">© 2023 Foundation Twenty-nine. All rights reserved <a href="mailto:info@foundation29.org">info@foundation29.org</a></h4>
+    <div style="margin-top: 3em;text-align:center;">
+      <span>© 2024 Foundation Twenty-nine. All rights reserved <a href="mailto:info@foundation29.org">info@foundation29.org</a></span>
     </div>
   </footer>
 </html>

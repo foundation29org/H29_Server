@@ -290,7 +290,7 @@ function getGroup (req, res){
 
 function saveGroup (req, res){
   let userId= crypt.decrypt(req.params.userId);
-  User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+  User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
 		if (err) return res.status(500).send({message: 'Error making the request'})
 		if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 
@@ -306,13 +306,10 @@ function saveGroup (req, res){
         if (err) return res.status(500).send({ message: `Error searching de new user: ${err}`})
         if (!user2){
           let randomstring = Math.random().toString(36).slice(-12)
-          let randompass = Math.random().toString(36).slice(-12)
-          let storagepass = sha512(randompass);
           const newuser = new User({
             email: group.email,
             role: 'Admin',
             userName: 'Change the name',
-            password: storagepass,
             confirmationCode: randomstring,
             lang: 'en',
             group: group.name,
@@ -356,7 +353,7 @@ function saveGroup (req, res){
 
 
         }else{
-          return res.status(202).send({ message: 'user exists'})
+          return res.status(202).send({ message: 'fail'})
         }
       })
 
@@ -401,7 +398,7 @@ function saveGroup (req, res){
 function updateGroup (req, res){
 
   let userId= crypt.decrypt(req.params.userId);
-  User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+  User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
     if (err) return res.status(500).send({message: 'Error making the request:'})
     if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 
@@ -456,7 +453,7 @@ function deleteGroup (req, res){
   params = params.split("-code-");
   let userId= crypt.decrypt(params[0]);
   //añado  {"_id" : false} para que no devuelva el _id
-  User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+  User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
     if (err) return res.status(500).send({message: 'Error making the request:'})
     if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 
@@ -583,7 +580,7 @@ function getPhenotypeGroup (req, res){
 function updatePhenotypeGroup (req, res){
 
   let userId= crypt.decrypt(req.params.userId);
-  User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+  User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
     if (err) return res.status(500).send({message: 'Error making the request:'})
     if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 
@@ -787,7 +784,7 @@ function getMedicationsGroup (req, res){
 function updateMedicationsGroup (req, res){
 
   let userId= crypt.decrypt(req.params.userId);
-  User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+  User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
     if (err) return res.status(500).send({message: 'Error making the request:'})
     if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 
@@ -822,7 +819,7 @@ function updateMedicationsGroup (req, res){
 function updatePromsGroup (req, res){
 
   let userId= crypt.decrypt(req.params.userId);
-  User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+  User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
     if (err) return res.status(500).send({message: 'Error making the request:'})
     if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 

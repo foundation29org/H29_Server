@@ -14,8 +14,6 @@
     "@azure/storage-blob": "^12.3.0",
     "applicationinsights": "^1.8.10",
     "async": "^2.6.0",
-    "authy": "^1.4.0",
-    "authy-client": "^1.1.4",
     "axios": "^0.21.4",
     "azure-sb": "^0.10.6",
     "azure-storage": "^2.10.3",

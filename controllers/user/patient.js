@@ -54,7 +54,7 @@ function getPatientsUser (req, res){
 	let userId= crypt.decrypt(req.params.userId);
 
 
-	User.findById(userId, {"_id" : false , "password" : false, "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
 		if (err) return res.status(500).send({message: 'Error making the request:'})
 		if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 
@@ -534,6 +534,32 @@ function getSubscriptionToGroupAlerts(req,res){
 	}
 }
 
+function getEmergencyNotes(req, res){
+	let patientId=crypt.decrypt(req.params.patientId);
+	if(patientId!=undefined){
+		Patient.findById(patientId,(err,patientFound)=>{
+			if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+			if(patientFound){
+				return res.status(200).send({emergencyNotes:patientFound.emergencyNotes});
+			}
+			if(!patientFound){
+				return res.status(200).send({emergencyNotes:''});
+			}
+		})
+	}
+}
+
+function setEmergencyNotes(req, res){
+	let patientId = crypt.decrypt(req.params.patientId);
+	let emergencyNotes = req.body.emergencyNotes;
+	if(patientId != undefined){
+		Patient.findByIdAndUpdate(patientId, { emergencyNotes: emergencyNotes }, (err, patientUpdated) => {
+			if (err) return res.status(500).send({message: `Error updating the patient: ${err}`})
+			return res.status(200).send({patient: patientUpdated});
+		})
+	}
+}
+
 module.exports = {
 	getPatientsUser,
 	getPatient,
@@ -542,6 +568,8 @@ module.exports = {
 	deletePatient,
 	deleteSubscriptionToGroupAlerts,
 	addSubscriptionToGroupAlerts,
-	getSubscriptionToGroupAlerts
+	getSubscriptionToGroupAlerts,
+	getEmergencyNotes,
+	setEmergencyNotes
 
 }

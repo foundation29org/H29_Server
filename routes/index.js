@@ -58,23 +58,15 @@ const api = express.Router()
 
 // user routes, using the controller user, this controller has methods
 //routes for login-logout
+api.post('/sendcode', userCtrl.sendcode)
 api.post('/signup', userCtrl.signUp)
 api.post('/signin', userCtrl.signIn)
-api.post('/signin/registerUserInAuthy', userCtrl.registerUserInAuthy)
-api.post('/signin2FA', userCtrl.signin2FA)
-
-// activarcuenta
-api.post('/activateuser', userCtrl.activateUser)
-
-// recuperar password
-api.post('/recoverpass', userCtrl.recoverPass)
-api.post('/updatepass', userCtrl.updatePass)
-api.post('/newpass', auth(roles.All), userCtrl.newPass)
 
 api.get('/users/:userId', auth(roles.All), userCtrl.getUser)
 api.get('/users/settings/:userId', auth(roles.All), userCtrl.getSettings)
 api.put('/users/:userId', auth(roles.AllLessResearcher), userCtrl.updateUser)
-api.delete('/users/:userId', auth(roles.AllLessResearcher), userCtrl.deleteUser)//de momento no se usa
+api.post('/users/senddeletecode/:userId', auth(roles.AllLessResearcher), userCtrl.senddeletecode)
+api.post('/users/deleteaccount/:userId', auth(roles.AllLessResearcher), userCtrl.deleteUser)
 api.post('/user/changeterms/:userId', auth(roles.OnlyUser), userCtrl.changeTerms)
 
 //export data
@@ -95,6 +87,8 @@ api.delete('/patients/:patientId', auth(roles.OnlyUser), patientCtrl.deletePatie
 api.post('/patients/updateSubscriptionTrue/:patientId', auth(roles.OnlyUser), patientCtrl.addSubscriptionToGroupAlerts)
 api.post('/patients/updateSubscriptionFalse/:patientId', auth(roles.OnlyUser), patientCtrl.deleteSubscriptionToGroupAlerts)
 api.get('/patients/getSubscriptionToGroupAlerts/:patientId', auth(roles.UserResearcher), patientCtrl.getSubscriptionToGroupAlerts)
+api.get('/patient/emergencynotes/:patientId', auth(roles.OnlyUser), patientCtrl.getEmergencyNotes)
+api.post('/patient/emergencynotes/:patientId', auth(roles.OnlyUser), patientCtrl.setEmergencyNotes)
 
 // socialinfo routes, using the controller socialinfo, this controller has methods
 api.get('/socialinfos/:patientId', auth(roles.UserResearcher), socialInfoCtrl.getSocialInfo)

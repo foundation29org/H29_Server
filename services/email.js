@@ -94,206 +94,7 @@ function sendMailVerifyEmail (email, randomstring, lang, group){
   });
   return decoded
 }
-function sendMailVerifyEmailAndDownloadAuthy (email,adminEmail, randomstring, lang, group){
-  var namePlatform=""
-  if(lang=='es'){
-    var subjectlang='Activa la cuenta y descarga la aplicación';
-    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
-      namePlatform="Plataforma de Datos de Duchenne."
-    }
-    else{
-      namePlatform="Health29"
-    }
-  }else if(lang=='pt'){
-    var subjectlang='Ative a conta o download da aplicação';
-  }else if(lang=='de'){
-    var subjectlang='Aktivieren Sie das Konto und laden Sie die Anwendung herunter';
-  }else if(lang=='nl'){
-    var subjectlang='Activeer het account en download de applicatie';
-    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
-      namePlatform="Duchenne Data Platform"
-    }
-    else{
-      namePlatform="Health29"
-    }
-  }else{
-    var subjectlang='Activate the account and download the application';
-    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
-      namePlatform="Duchenne Data Platform"
-    }
-    else{
-      namePlatform="Health29"
-    }
-  }
-  const decoded = new Promise((resolve, reject) => {
 
-    var maillistbcc = [
-      'support@foundation29.org'
-    ];
-
-    var urlImg = client_server+'/assets/img/Health29.png';
-    
-    var mailOptions = {
-      to: email,
-      cc:adminEmail,
-      bcc: maillistbcc,
-      from:'support@foundation29.org',
-      subject: subjectlang,
-      template: 'verify_email_and_app/_'+lang,
-      context: {
-        client_server : client_server,
-        email : email,
-        key : randomstring,
-        urlImg: urlImg,
-        namePlatform : namePlatform,
-        adminEmail:adminEmail
-      }
-    };
-
-    
-    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
-      urlImg = client_server+'/assets/img/duchenne-medium.png';
-
-      var maillistbcc = [
-        'support@foundation29.org',
-        'info@duchenne.nl',
-        'fknuistinghneven@gmail.com',
-      ];
-
-      mailOptions = {
-        to: email,
-        cc:adminEmail,
-        bcc: maillistbcc,
-        from:'support@foundation29.org',
-        subject: subjectlang,
-        template: 'verify_email_and_app/_'+lang,
-        context: {
-          client_server : client_server,
-          email : email,
-          key : randomstring,
-          urlImg: urlImg,
-          namePlatform : namePlatform,
-          adminEmail:adminEmail
-        }
-      };
-    }
-
-
-    transporter.sendMail(mailOptions, function(error, info){
-      if (error) {
-        console.log(error);
-        reject({
-          status: 401,
-          message: 'Fail sending email'
-        })
-      } else {
-        console.log('Email sent: ' + info.response);
-        resolve("ok")
-      }
-    });
-
-  });
-  return decoded
-}
-function sendMailDownloadAuthy (email,adminEmail, randomstring, lang, group){
-  var namePlatform=""
-  if(lang=='es'){
-    var subjectlang='Descarga la aplicación';
-    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
-      namePlatform="Plataforma de Datos de Duchenne. "
-    }
-    else{
-      namePlatform="Health29"
-    }
-  }else if(lang=='pt'){
-    var subjectlang='Download da aplicação';
-  }else if(lang=='de'){
-    var subjectlang='Laden Sie die Anwendung herunter';
-  }else if(lang=='nl'){
-    var subjectlang='Download de applicatie';
-    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
-      namePlatform="Duchenne Data Platform"
-    }
-    else{
-      namePlatform="Health29"
-    }
-  }else{
-    var subjectlang='Download the application';
-    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
-      namePlatform="Duchenne Data Platform"
-    }
-    else{
-      namePlatform="Health29"
-    }
-  }
-  const decoded = new Promise((resolve, reject) => {
-
-    var maillistbcc = [
-      'support@foundation29.org'
-    ];
-    var urlImg = client_server+'/assets/img/Health29.png';
-    var mailOptions = {};
-
-
-    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
-      urlImg = client_server+'/assets/img/duchenne-medium.png';
-      var maillistbcc = [
-        'support@foundation29.org',
-        'info@duchenne.nl',
-        'fknuistinghneven@gmail.com',
-      ];
-
-      mailOptions = {
-        to: email,
-        cc:adminEmail,
-        bcc: maillistbcc,
-        from:'support@foundation29.org',
-        subject: subjectlang,
-        template: 'verify_app/_'+lang,
-        context: {
-          client_server : client_server,
-          email : email,
-          key : randomstring,
-          urlImg: urlImg,
-          namePlatform : namePlatform,
-          adminEmail:adminEmail
-        }
-      };
-    }else{
-      mailOptions = {
-        to: email,
-        cc:adminEmail,
-        from:'support@foundation29.org',
-        subject: subjectlang,
-        template: 'verify_app/_'+lang,
-        context: {
-          client_server : client_server,
-          email : email,
-          key : randomstring,
-          urlImg: urlImg,
-          namePlatform : namePlatform,
-          adminEmail:adminEmail
-        }
-      };
-    }
-
-
-    transporter.sendMail(mailOptions, function(error, info){
-      if (error) {
-        console.log(error);
-        reject({
-          status: 401,
-          message: 'Fail sending email'
-        })
-      } else {
-        console.log('Email sent: ' + info.response);
-        resolve("ok")
-      }
-    });
-
-  });
-  return decoded
-}
 function sendMailRecoverPass (email, randomstring, lang, group){
   if(lang=='es'){
     var subjectlang='Recuperación de la cuenta';
@@ -412,16 +213,9 @@ function sendMailRequestNewTranslation (user, lang, jsonData){
   });
   return decoded
 }
-function sendMailSupport (email, lang, role, supportStored, emailTo){
+function sendMailSupport (email, lang, supportStored, emailTo){
   const decoded = new Promise((resolve, reject) => {
     var urlImg = client_server+'/assets/img/Health29.png';
-    var attachments = [];
-    if(supportStored.files.length>0){
-      supportStored.files.forEach(function(file) {
-        var urlpath = 'https://'+blobAccessToken.accountBlobName+'.blob.core.windows.net/filessupport/'+file+blobAccessToken.sasToken;
-        attachments.push({filename: file, path: urlpath});
-      });
-    }
 
     var emailToFinal = 'support@foundation29.org'
     if(emailTo!=null){
@@ -437,8 +231,7 @@ function sendMailSupport (email, lang, role, supportStored, emailTo){
         email : email,
         lang : lang,
         info: supportStored
-      },
-      attachments: attachments
+      }
     };
 
     transporter.sendMail(mailOptions, function(error, info){
@@ -522,14 +315,114 @@ function sendMailrequestNewFAQ (user,userEmail,group, lang, jsonData){
   return decoded
 }
 
+function sendEmailLogin (email, randomstring, group, lang){
+  var subject='Your verification code is';
+  if(lang=='es'){
+    subject='Tu código de verificación es';
+  }else if(lang=='nl'){
+    subject='Uw verificatiecode is';
+  }
+  subject = subject + ' ' + randomstring;
+  const decoded = new Promise((resolve, reject) => {
+
+    var maillistbcc = [
+      'support@foundation29.org',
+    ];
+    console.log(group)
+    var urlImg = client_server+'/assets/img/health29-medium.png';
+    //urlImg = 'https://health29-dev.azurewebsites.net/assets/img/health29-medium.png';
+    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
+      urlImg = client_server+'/assets/img/logo1.png';
+      //urlImg = 'https://health29-dev.azurewebsites.net/assets/img/logo1.png';
+    }
+    var mailOptions = {
+      to: email,
+      from:'support@foundation29.org',
+      subject: subject,
+      template: 'login_pass/_'+lang,
+      context: {
+        client_server : client_server,
+        email : email,
+        key : randomstring,
+        urlImg : urlImg
+      }
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+        reject({
+          status: 401,
+          message: 'Fail sending email'
+        })
+      } else {
+        console.log('Email sent: ' + info.response);
+        resolve("ok")
+      }
+    });
+
+  });
+  return decoded
+}
+
+function sendEmailDelete (email, randomstring, group, lang){
+  var subject = 'Your account deletion code is';
+  if(lang == 'es') {
+      subject = 'Tu código para eliminar la cuenta es';
+  } else if(lang == 'nl') {
+      subject = 'Uw code voor accountverwijdering is';
+  }
+  subject = subject + ' ' + randomstring;
+  const decoded = new Promise((resolve, reject) => {
+
+    var maillistbcc = [
+      'support@foundation29.org',
+    ];
+    console.log(group)
+    var urlImg = client_server+'/assets/img/health29-medium.png';
+    urlImg = 'https://health29-dev.azurewebsites.net/assets/img/health29-medium.png';
+    if(group == DUCHENNENETHERLANDS || group == DUCHENNEINTERNATIONAL){
+      //urlImg = client_server+'/assets/img/logo1.png';
+      urlImg = 'https://health29-dev.azurewebsites.net/assets/img/logo1.png';
+    }
+    var mailOptions = {
+      to: email,
+      from:'support@foundation29.org',
+      subject: subject,
+      template: 'delete_pass/_'+lang,
+      context: {
+        client_server : client_server,
+        email : email,
+        key : randomstring,
+        urlImg : urlImg
+      }
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+        reject({
+          status: 401,
+          message: 'Fail sending email'
+        })
+      } else {
+        console.log('Email sent: ' + info.response);
+        resolve("ok")
+      }
+    });
+
+  });
+  return decoded
+}
+
 
 module.exports = {
   sendMailVerifyEmail,
-  sendMailVerifyEmailAndDownloadAuthy,
-  sendMailDownloadAuthy,
   sendMailRecoverPass,
   sendMailRequestNewLanguage,
   sendMailRequestNewTranslation,
   sendMailSupport,
-  sendMailrequestNewFAQ
+  sendMailrequestNewFAQ,
+  sendEmailLogin,
+  sendEmailDelete
 }

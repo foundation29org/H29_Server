@@ -42,6 +42,7 @@ const PatientSchema = Schema({
 	death: Date,
 	notes: {type: String, default: ''},
 	answers: {type: Object, default: []},
+	emergencyNotes: {type: String, default: ''},
 	subscriptionToGroupAlerts:{type:Boolean,default:true}
 })
 
