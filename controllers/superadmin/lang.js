@@ -57,7 +57,7 @@ function updateLangFile (req, res){
 	let lang = req.body.lang;
 	let jsonData = req.body.jsonData;
 	//añado  {"_id" : false} para que no devuelva el _id
-	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
 		if (err) return res.status(500).send({message: 'Error making the request:'})
 		if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 
@@ -115,7 +115,7 @@ function updateLangFile (req, res){
 function addlang (req, res){
 	let userId= crypt.decrypt(req.params.userId);
 	//añado  {"_id" : false} para que no devuelva el _id
-	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
 		if (err) return res.status(500).send({message: 'Error making the request:'})
 		if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 
@@ -204,7 +204,7 @@ function deletelang (req, res){
 	params = params.split("-code-");
 	let userId= crypt.decrypt(params[0]);
 	//añado  {"_id" : false} para que no devuelva el _id
-	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
 		if (err) return res.status(500).send({message: 'Error making the request:'})
 		if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 

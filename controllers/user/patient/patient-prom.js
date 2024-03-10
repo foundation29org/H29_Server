@@ -230,71 +230,52 @@ async function getInfoProms3(prom, patientId){
  * 	}
  */
  async function saveProms (req, res){
-	let patientId= crypt.decrypt(req.params.patientId)
-	var listPromsChanged = req.body;
-	var res0 = await saveOneProm(listPromsChanged, patientId);
-	res.status(200).send({message: 'Proms saved'})
+	try {
+        let patientId = crypt.decrypt(req.params.patientId);
+        await saveOneProm(req.body, patientId);
+        res.status(200).send({ message: 'Proms saved' });
+    } catch (error) {
+        console.error('Error saving proms:', error);
+        // Considera usar un código de estado adecuado para reflejar el error.
+        res.status(500).send({ message: 'Error saving proms' });
+    }
 }
 
 async function saveOneProm(listPromsChanged, patientId) {
-	return new Promise(async function (resolve, reject) {
-
-                var promises = [];
-                for (var i = 0; i < listPromsChanged.length; i++) {
-                    promises.push(saveInfoOneProm(listPromsChanged[i], patientId));
-                }
-                await Promise.all(promises)
-                    .then(async function (data) {
-                        console.log(data);
-                        console.log('termina')
-                        resolve(data)
-                    })
-                    .catch(function (err) {
-                        console.log('Manejar promesa rechazada (' + err + ') aquí.');
-                        reject('Manejar promesa rechazada (' + err + ') aquí.');
-                    });
-
-		
-
-	});
+	const promises = listPromsChanged.map(prom => saveInfoOneProm(prom, patientId));
+    await Promise.all(promises);
+    console.log('Todos los proms han sido guardados.');
 }
 
-function saveInfoOneProm(prominfo, patientId) {
-    return new Promise(async function (resolve, reject) {
-		Prom.findById(prominfo.promId, async (err, promold) => {
-			if(err){
-				console.log(err)
-			}
-			var id_answers = [];
-			if(promold.values.length>0){
-				for (var i = 0; i < promold.values.length; i++) {
-						var isArray = Array.isArray(prominfo.data)
-						if(isArray){
-							for (var j = 0; j < prominfo.data.length; j++) {
-								if(promold.values[i].value==prominfo.data[j]){
-									id_answers.push({idanswer: promold.values[i]._id, value: prominfo.data[j]});
-								}
-							}
-						}else{
-							if(promold.values[i].value==prominfo.data){
-								id_answers.push({idanswer: promold.values[i]._id, value: prominfo.data});
-							}
-						}
+async function saveInfoOneProm(promInfo, patientId) {
+    try {
+        const promOld = await Prom.findById(promInfo.promId).exec(); // Asegúrate de que Prom.findById devuelva una promesa.
+        let idAnswers = [];
 
-				}
-			}
-			let patientProm = new PatientProm()
-			patientProm.data = prominfo.data
-			patientProm.definitionPromId = prominfo.promId
-			patientProm.metainfo = id_answers
-			patientProm.createdBy = patientId
-			// when you save, returns an id in socialInfoStored to access that social-info
-			await patientProm.save((err, patientPromStored) => {
-				resolve(patientPromStored)
-			})
-		})
-    });
-	
+        if (promOld && promOld.values.length > 0) {
+            promOld.values.forEach(oldValue => {
+                const isMatch = Array.isArray(promInfo.data) 
+                                ? promInfo.data.includes(oldValue.value) 
+                                : oldValue.value === promInfo.data;
+                if (isMatch) {
+                    idAnswers.push({ idanswer: oldValue._id, value: oldValue.value });
+                }
+            });
+        }
+
+        let patientProm = new PatientProm({
+            data: promInfo.data,
+            definitionPromId: promInfo.promId,
+            metainfo: idAnswers,
+            createdBy: patientId
+        });
+
+        // Suponiendo que patientProm.save devuelve una promesa.
+        await patientProm.save();
+    } catch (error) {
+        console.error('Error saving info for one prom:', error);
+        throw error; // Propaga el error para manejarlo en el bloque try-catch de saveProms.
+    }
 }
 
 

@@ -37,8 +37,7 @@ const UserSchema = Schema({
         match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,63})+$/, 'Please fill a valid email address']
     },
 	role: { type: String, required: true, enum: ['Admin', 'User', 'Researcher'], default: 'User'},
-	group: { type: String, required: true, default: 'None'},
-	confirmed: {type: Boolean, default: false},
+	group: { type: String, required: true, default: 'Duchenne Parent Project International'},
 	confirmationCode: String,
 	dateTimeLogin: Date,
 	signupDate: {type: Date, default: Date.now},
@@ -55,8 +54,6 @@ const UserSchema = Schema({
 	permissions: {type: Object, default: {}},
 	modules: {type: Object, default: []},
 	platform: {type: String, default: ''},
-	authyId:{type:String,default:null},
-	authyDeviceId:{type:Object,default:[]},
 	termsAccepted: {type: TermsSchema, default: {
 		displayed: false,
 		conditionAccepted: false
@@ -107,10 +104,6 @@ UserSchema.statics.getAuthenticated = function(email, cb) {
         if (!user) {
             return cb(null, null, reasons.NOT_FOUND);
         }
-		//Check if the account is activated.
-		if (!user.confirmed) {
-            return cb(null, null, reasons.UNACTIVATED);
-        }
 		if(user.blockedaccount){
 			return cb(null, null, reasons.BLOCKED);
 		}
@@ -143,7 +136,7 @@ UserSchema.statics.getAuthenticated = function(email, cb) {
 				if (err) return cb(err);
 				return cb(null, user);
 		});
-    }).select('_id email loginAttempts lockUntil confirmed lastLogin role userName lang randomCodeRecoverPass dateTimeRecoverPass group subgroup blockedaccount permissions termsAccepted signupDate');
+    }).select('_id email loginAttempts lockUntil lastLogin role userName lang randomCodeRecoverPass dateTimeRecoverPass group subgroup blockedaccount permissions termsAccepted signupDate');
 };
 
 module.exports = conndbaccounts.model('User',UserSchema)

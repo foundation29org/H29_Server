@@ -356,7 +356,6 @@ function setSubgroupUser (req, res){
  * 			"email": <user email>,
  * 			"role": 'User',
  * 			"group": <group name>,
- * 			"confirmed": true,
  * 			"confirmationCode": <confirmationCode>,
  * 			"signupDate": <signupDate>,
  * 			"lastLogin": <lastLogin>,
@@ -374,7 +373,6 @@ function setSubgroupUser (req, res){
  */
 function setStateUser (req, res){
 	let userId= crypt.decrypt(req.params.userId);
-	let update = req.body
 	User.findByIdAndUpdate(userId, { blockedaccount: req.body.blockedaccount }, {new: true}, (err, userUpdated) => {
 		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
 

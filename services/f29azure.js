@@ -105,9 +105,15 @@ function getAzureBlobSasTokenRead (req, res){
     });
   }
 
+  async function deleteContainers(containerName) {
+    const containerClient = await blobServiceClientGenomics.getContainerClient(containerName);
+    containerClient.delete();
+  }
+
 module.exports = {
   getAzureBlobSasTokenWithContainer,
   getAzureBlobSasTokenRead,
   createContainers,
-  downloadBlob
+  downloadBlob,
+  deleteContainers
 }

@@ -22,7 +22,6 @@ function sendMsgSupport(req, res){
 			support.type = req.body.type
 			support.subject = req.body.subject
 			support.description = req.body.description
-			support.files = req.body.files
 			support.groupId = req.body.groupId
 			support.createdBy = userId
 
@@ -35,7 +34,7 @@ function sendMsgSupport(req, res){
 						emailTo = group.email
 					}
 
-					serviceEmail.sendMailSupport(user.email, user.lang, user.role, supportStored, emailTo)
+					serviceEmail.sendMailSupport(user.email, user.lang, supportStored, emailTo)
 						.then(response => {
 							return res.status(200).send({ message: 'Email sent'})
 						})
@@ -80,7 +79,7 @@ function getUserMsgs(req, res){
 function getAllMsgs(req, res){
 	let userId= crypt.decrypt(req.params.userId);
 	var groupId = req.body.groupId;
-	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user) => {
+	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
 		if (err) return res.status(500).send({message: 'Error making the request:'})
 		if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 		if(user.role == 'SuperAdmin'){
@@ -90,7 +89,7 @@ function getAllMsgs(req, res){
 				if(msgs.length>0){
 					msgs.forEach(function(u) {
 						//if(u.platform=='H29' || u.platform==undefined){
-							User.findById(u.createdBy, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user2) => {
+							User.findById(u.createdBy, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user2) => {
 								if(user2){
 									listmsgs.push({ subject:u.subject, description: u.description, date: u.date, status: u.status, statusDate: u.statusDate, type: u.type, _id: u._id, files: u.files, email: user2.email, lang: user2.lang, id: u._id});
 								}else{
@@ -122,7 +121,7 @@ function getAllMsgs(req, res){
 				if(msgs.length>0){
 					msgs.forEach(function(u) {
 						//if(u.platform=='H29' || u.platform==undefined){
-							User.findById(u.createdBy, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "confirmed" : false, "lastLogin" : false}, (err, user2) => {
+							User.findById(u.createdBy, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user2) => {
 								if(user2){
 									listmsgs.push({ subject:u.subject, description: u.description, date: u.date, status: u.status, statusDate: u.statusDate, type: u.type, _id: u._id, files: u.files, email: user2.email, lang: user2.lang, id: u._id});
 								}else{

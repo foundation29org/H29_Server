@@ -62,13 +62,11 @@ api.post('/sendcode', userCtrl.sendcode)
 api.post('/signup', userCtrl.signUp)
 api.post('/signin', userCtrl.signIn)
 
-// activarcuenta
-api.post('/activateuser', userCtrl.activateUser)
-
 api.get('/users/:userId', auth(roles.All), userCtrl.getUser)
 api.get('/users/settings/:userId', auth(roles.All), userCtrl.getSettings)
 api.put('/users/:userId', auth(roles.AllLessResearcher), userCtrl.updateUser)
-api.delete('/users/:userId', auth(roles.AllLessResearcher), userCtrl.deleteUser)//de momento no se usa
+api.post('/users/senddeletecode/:userId', auth(roles.AllLessResearcher), userCtrl.senddeletecode)
+api.post('/users/deleteaccount/:userId', auth(roles.AllLessResearcher), userCtrl.deleteUser)
 api.post('/user/changeterms/:userId', auth(roles.OnlyUser), userCtrl.changeTerms)
 
 //export data
