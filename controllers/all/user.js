@@ -28,6 +28,63 @@ const f29azureService = require("../../services/f29azure")
 const crypt = require('../../services/crypt')
 const Patient = require('../../models/patient')
 
+
+/**
+ * @api {post} https://health29.org/api/sendcode Send confirmation code to user's email
+ * @apiName sendCode
+ * @apiVersion 1.0.0
+ * @apiGroup Access token
+ * @apiDescription This method sends a confirmation code to the user's email, which is required to complete the login process via the /signin endpoint.
+ * 
+ * The confirmation code is sent as a 6-digit numeric value. This code is valid for a limited time (e.g., 5 minutes). Once the code is received via email, it should be used in conjunction with the email address to authenticate the user via the [signin](#api-Access_token-signIn) method.
+ * 
+ * @apiExample {js} Example for general usage
+ *  var formValue = { email: "aa@aa.com" };
+ *  this.http.post('https://health29.org/api/sendcode',formValue)
+ *    .subscribe( (res : any) => {
+ *      console.log(res.message); // Should return "Check email"
+ *   }, (err) => {
+ *     console.error(err.message);
+ *   }
+ *
+ * @apiParam (body) {String} email User's email address.
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "email": "example@ex.com"
+ *     }
+ * 
+ * @apiSuccess {String} message This message will be "Check email" if the code was successfully sent to the user's email.
+ * 
+ * @apiSuccess (Success 202) {String} message Information about the request. Possible responses include:
+ * * Login failed
+ * * Account is temporarily locked
+ * * Account is unactivated
+ * * The user does not exist
+ * 
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ *  "message": "Check email"
+ * }
+ * 
+ * @apiError {String} message Descriptive message of the error. Possible errors:
+ * * Error making the request: <error>
+ * * The user does not exist
+ * * Account is temporarily locked
+ * * Account is unactivated
+ * * Account is blocked
+ * 
+ * @apiErrorExample Error-Response:
+ * HTTP/1.1 404 Not Found
+ * {
+ *   "code": 208,
+ *   "message": "The user does not exist"
+ * }
+ *
+ */
+
+
 function sendcode(req, res) {
 	// attempt to authenticate user
 	req.body.email = (req.body.email).toLowerCase();
@@ -105,6 +162,56 @@ function sendcode(req, res) {
 	})
 }
 
+/**
+ * @api {post} https://health29.org/api/api/signUp New account
+ * @apiName signUp
+ * @apiVersion 1.0.0
+ * @apiGroup Account
+ * @apiDescription This method allows you to create a user account in health 29
+ * @apiExample {js} Example usage:
+ *  var formValue = { email: "example@ex.com", userName: "Peter", lang: "en", group: "None"};
+ *   this.http.post('https://health29.org/api/signup',formValue)
+ *    .subscribe( (res : any) => {
+ *      if(res.message == "Account created"){
+ *        console.log("Check the email to activate the account");
+ *      }else if(res.message == 'Fail sending email'){
+ *        //contact with health29
+ *      }else if(res.message == 'user exists'){
+ *       ...
+ *      }
+ *   }, (err) => {
+ *     ...
+ *   }
+ *
+ * @apiParam (body) {String} email User email
+ * @apiParam (body) {String} userName User name
+ * @apiParam (body) {String} lang Lang of the User. For this, go to  [Get the available languages](#api-Languages-getLangs).
+ * We currently have 5 languages, but we will include more. The current languages are:
+ * * English: en
+ * * Spanish: es
+ * * German: de
+ * * Dutch: nl
+ * * Portuguese: pt
+ * @apiParam (body) {String} [group] Group to which the user belongs, if it does not have a group or do not know the group to which belongs, it will be 'None'. If the group is not set, it will be set to 'None' by default.
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "email": "example@ex.com",
+ *       "userName": "Peter",
+ *       "group": "None",
+ *       "lang": "en"
+ *     }
+ * @apiSuccess {String} message Information about the request. One of the following answers will be obtained:
+ * * Account created (The user should check the email to activate the account)
+ * * Fail sending email
+ * * user exists
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ *  "message": "Account created"
+ * }
+ *
+ */
+
 function signUp(req, res){
 	let randomstring = Math.random().toString(36).slice(-12)
 
@@ -136,6 +243,68 @@ function signUp(req, res){
 	})
 }
 
+/**
+ * @api {post} https://health29.org/api/signin Get the token (and the userId)
+ * @apiName signIn
+ * @apiVersion 1.0.0
+ * @apiGroup Access token
+ * @apiDescription This method gets the token and the language for the user. This token includes the encrypt id of the user, token expiration date, role, and the group to which it belongs.
+ * The token are encoded using <a href="https://en.wikipedia.org/wiki/JSON_Web_Token" target="_blank">jwt</a>
+ * <br>
+ * <br>
+ * The functionality of this method is directly related to the sendcode call. You need to first call [sendcode](#api-Access_token-sendCode) to get the confirmationCode.
+ * <br>
+ * <br>
+ * @apiExample {js} Example for general usage
+ *  var formValue = { email: "aa@aa.com", confirmationCode: 163646};
+ *  this.http.post('https://health29.org/api/signin',formValue)
+ *    .subscribe( (res : any) => {
+ *      if(res.message == "You have successfully logged in"){
+ *        console.log(res.lang);
+ *        console.log(res.token);
+ *      }else{
+ *        this.isloggedIn = false;
+ *      }
+ *   }, (err) => {
+ *     this.isloggedIn = false;
+ *   }
+ *
+ * @apiParam (body) {String} email User email
+ * @apiParam (body) {String} confirmationCode Code received by email. To receive the code, you must call /sendcode
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "email": "example@ex.com",
+ *       "confirmationCode": "189646",
+ *     }
+ * @apiSuccess {String} message If all goes well, the system should return 'You have successfully logged in'
+ * @apiSuccess {String} token You will need this <strong>token</strong> in the header of almost all requests to the API. Whenever the user wants to access a protected route or resource, the user agent should send the JWT, in the Authorization header using the Bearer schema.
+ * <p>The data contained in the token are: encrypted <strong>userId</strong>, expiration token, group, and role.
+ * To decode them, you you must use some jwt decoder <a href="https://en.wikipedia.org/wiki/JSON_Web_Token" target="_blank">jwt</a>. There are multiple options to do it, for example for javascript: <a href="https://github.com/hokaccha/node-jwt-simple" target="_blank">Option 1</a> <a href="https://github.com/auth0/jwt-decode" target="_blank">Option 2</a>
+ * When you decode, you will see that it has several values, these are:</p>
+ * <p>
+ * <ul>
+ *  <li>sub: the encrypted userId. This value will also be used in many API queries. It is recommended to store only the token, and each time the userId is required, decode the token.</li>
+ *  <li>exp: The expiration time claim identifies the expiration time on or after which the JWT must not be accepted for processing.</li>
+ *  <li>group: Group to which the user belongs, if it does not have a group, it will be 'None'. </li>
+ *  <li>role: Role of the user. Normally it will be 'User'.</li>
+ * </ul>
+ * </p>
+ * @apiSuccess {String} lang Lang of the User.
+
+ * @apiSuccess (Success 202) {String} message Information about the request. The credentials are incorrect or something has gone wrong. One of the following answers will be obtained:
+ * * Not found
+ * * Login failed
+ * * Account is temporarily locked
+ * * Account is unactivated
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ *  "message": "You have successfully logged in",
+ *  "token": "eyJ0eXAiOiJKV1QiLCJhbGciPgDIUzI1NiJ9.eyJzdWIiOiI1M2ZlYWQ3YjY1YjM0ZTQ0MGE4YzRhNmUyMzVhNDFjNjEyOThiMWZjYTZjMjXkZTUxMTA9OGVkN2NlODMxYWY3IiwiaWF0IjoxNTIwMzUzMDMwLCJlcHAiOjE1NTE4ODkwMzAsInJvbGUiOiJVc2VyIiwiZ3JvdDEiOiJEdWNoZW5uZSBQYXJlbnQgUHJfrmVjdCBOZXRoZXJsYW5kcyJ9.MloW8eeJ857FY7-vwxJaMDajFmmVStGDcnfHfGJx05k",
+ *  "lang": "en"
+ * }
+ *
+ */
 function signIn(req, res){
     // attempt to authenticate user
 	req.body.email = (req.body.email).toLowerCase();
