@@ -14,7 +14,7 @@
     "@azure/storage-blob": "^12.3.0",
     "applicationinsights": "^1.8.10",
     "async": "^2.6.0",
-    "axios": "^0.21.4",
+    "axios": "^1.15.0",
     "azure-sb": "^0.10.6",
     "azure-storage": "^2.10.3",
     "bcrypt-nodejs": "0.0.3",
