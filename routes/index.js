@@ -247,6 +247,14 @@ api.get('/translationstructureproms/:langAndgroupId', auth(roles.All), structure
 api.post('/structureproms', auth(roles.SuperAdmin), structurePromCtrl.savePromsStructure)
 api.put('/structureproms/:promId', auth(roles.SuperAdmin), structurePromCtrl.updatePromsStructure)
 
+api.get('/diag/dbstate', function(req, res) {
+  const { conndbaccounts, conndbdata } = require('../db_connect')
+  res.status(200).send({
+    accounts: conndbaccounts.readyState,
+    data: conndbdata.readyState
+  })
+})
+
 // lang routes, using the controller lang, this controller has methods
 api.get('/langs/',  langCtrl.getLangs)
 

@@ -53,8 +53,14 @@ const crypt = require('../../services/crypt')
  * ]
  */
 function getLangs (req, res){
+	console.log('[api/langs] request received')
 	Lang.find({}, function(err, langs) {
+		console.log('[api/langs] query callback, err: %s, count: %s', err && err.message ? err.message : 'none', langs ? langs.length : 'undefined')
     var listLangs = [];
+
+		if(err){
+			return res.status(500).send({ message: 'Error loading languages' })
+		}
 
 		if(langs!=undefined){
 			langs.forEach(function(lang) {
