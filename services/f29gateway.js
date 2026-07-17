@@ -1,5 +1,6 @@
 'use strict'
 const request = require('request')
+const config = require('../config')
 //'url': config.dx29Gateway+'/api/v1/Diagnosis/calculate?filterConditions=false&filterMatches=true',
 
 function searchSymptoms (req, res){
@@ -8,7 +9,7 @@ function searchSymptoms (req, res){
   let lang = req.body.lang;
   var options = {
     'method': 'GET',
-    'url': encodeURI('http://dx29-api.northeurope.cloudapp.azure.com/api/v4/PhenotypeSearch/terms?text='+text+'&lang='+lang+'&rows=20'),
+    'url': encodeURI(config.dx29Gateway+'/api/v4/PhenotypeSearch/terms?text='+text+'&lang='+lang+'&rows=20'),
     'headers': {
       'Content-Type': 'application/json'
     }
