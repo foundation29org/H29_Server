@@ -1,8 +1,6 @@
 'use strict'
 
-const crypt = require('./crypt')
 const config = require('../config')
-const request = require('request')
 const storage = require("@azure/storage-blob")
 const accountBlobName = config.blobAccessToken.accountBlobName;
 const keyAzureBlob = config.blobAccessToken.keyAzureBlob;
@@ -12,15 +10,6 @@ const blobServiceClientGenomics = new storage.BlobServiceClient(
     `https://${accountBlobName}.blob.core.windows.net`,
     sharedKeyCredentialGenomics
   );
-
-var azure = require('azure-storage');
-
-const User = require('../models/user')
-const Patient = require('../models/patient')
-
-var blobService = azure
-      .createBlobService(accountBlobName,keyAzureBlob);
-
 
 function getAzureBlobSasTokenWithContainer (req, res){
   var containerName = req.params.containerName;
@@ -42,6 +31,29 @@ function getAzureBlobSasTokenWithContainer (req, res){
 
     },sharedKeyCredentialGenomics).toString();
   res.status(200).send({containerSAS: containerSAS})
+}
+
+async function listBlobs (req, res){
+  try {
+    var containerName = req.params.containerName;
+    const containerClient = blobServiceClientGenomics.getContainerClient(containerName);
+    const exists = await containerClient.exists();
+    if (!exists) {
+      return res.status(200).send([]);
+    }
+    const entries = [];
+    for await (const blob of containerClient.listBlobsFlat()) {
+      entries.push({
+        name: blob.name,
+        lastModified: blob.properties.lastModified,
+        contentLength: blob.properties.contentLength
+      });
+    }
+    res.status(200).send(entries);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({message: 'Error listing blobs'});
+  }
 }
 
 function getAzureBlobSasTokenRead (req, res){
@@ -113,6 +125,7 @@ function getAzureBlobSasTokenRead (req, res){
 module.exports = {
   getAzureBlobSasTokenWithContainer,
   getAzureBlobSasTokenRead,
+  listBlobs,
   createContainers,
   downloadBlob,
   deleteContainers

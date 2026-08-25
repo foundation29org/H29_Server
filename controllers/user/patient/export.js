@@ -27,10 +27,11 @@ const crypt = require('../../../services/crypt')
 
 async function getProm(section, patientId, listSections, listProms, result, res, numberofSections) {
 	var promList = [];
-	await Prom.find({ section: section._id }).sort({ order: 'asc' }).exec(function (err, proms) {
-		if (err) return res.status(500).send({ message: `Error activating account: ${err}` })
-		promList = proms;
-	});
+	try {
+		promList = await Prom.find({ section: section._id }).sort({ order: 'asc' });
+	} catch (err) {
+		return res.status(500).send({ message: `Error activating account: ${err}` })
+	}
 	for (var i = 0; i < promList.length; i++) {
 		if (promList[i].enabled) {
 			var promData = []; // data de cada prom
@@ -51,8 +52,8 @@ async function getProm(section, patientId, listSections, listProms, result, res,
 }
 
 async function getPromData2(prom, patientId, res, promData) {
-	await PatientProm.findOne({ createdBy: patientId, "definitionPromId": prom._id }).sort({ date: 'desc' }).exec(function (err, patientprom) {
-		if (err) return res.status(500).send({ message: `Error activating account: ${err}` })
+	try {
+		const patientprom = await PatientProm.findOne({ createdBy: patientId, "definitionPromId": prom._id }).sort({ date: 'desc' });
 		var infoProm;
 		var dateProm;
 		if (patientprom) {
@@ -76,14 +77,15 @@ async function getPromData2(prom, patientId, res, promData) {
 			data: infoProm,
 			date: dateProm
 		});
-	});
+	} catch (err) {
+		return res.status(500).send({ message: `Error activating account: ${err}` })
+	}
 	return promData;
 }
 
 async function getPromData(prom, patientId, res, promData) {
-	await PatientProm.find({ createdBy: patientId, "definitionPromId": prom._id }).sort({ date: 'desc' }).exec(function (err, patientpromList) {
-		if (err) return res.status(500).send({ message: `Error activating account: ${err}` })
-
+	try {
+		const patientpromList = await PatientProm.find({ createdBy: patientId, "definitionPromId": prom._id }).sort({ date: 'desc' });
 		for (var i = 0; i < patientpromList.length; i++) {
 			var infoProm;
 			var dateProm;
@@ -109,7 +111,9 @@ async function getPromData(prom, patientId, res, promData) {
 				date: dateProm
 			});
 		}
-	});
+	} catch (err) {
+		return res.status(500).send({ message: `Error activating account: ${err}` })
+	}
 	return promData;
 }
 

@@ -110,54 +110,40 @@ function saveMassiveSeizure (req, res){
 }
 
 async function testOneSeizure(actualseizure, patientId){
-	var functionDone = false;
-	await Seizures.findOne({'GUID': actualseizure.GUID, 'createdBy': patientId}, (err, eventdb2) => {
-		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-		if(!eventdb2){
-			let eventdb = new Seizures()
-			eventdb.type = actualseizure.type
-			eventdb.duracion = actualseizure.duracion
-			eventdb.disparadores = actualseizure.disparadores
-			eventdb.disparadorEnfermo = actualseizure.disparadorEnfermo
-			eventdb.disparadorOtro = actualseizure.disparadorOtro
-			eventdb.disparadorNotas = actualseizure.disparadorNotas
-			eventdb.descripcion = actualseizure.descripcion
-			eventdb.descripcionRigidez = actualseizure.descripcionRigidez
-			eventdb.descripcionContraccion = actualseizure.descripcionContraccion
-			eventdb.descripcionOtro = actualseizure.descripcionOtro
-			eventdb.descipcionNotas = actualseizure.descipcionNotas
-			eventdb.postCrisis = actualseizure.postCrisis
-			eventdb.postCrisisOtro = actualseizure.postCrisisOtro
-			eventdb.postCrisisNotas = actualseizure.postCrisisNotas
-			eventdb.estadoAnimo = actualseizure.estadoAnimo
-			eventdb.estadoConsciencia = actualseizure.estadoConsciencia
-			eventdb.start = actualseizure.start
-			eventdb.end = actualseizure.end
-			eventdb.title = actualseizure.title
-			eventdb.color = actualseizure.color
-			eventdb.actions = actualseizure.actions
-			eventdb.GUID = actualseizure.GUID
-			eventdb.createdBy = patientId
-			var res1 = saveOneSeizure(eventdb)
-			// when you save, returns an id in eventdbStored to access that social-info
-			functionDone = true;
-		}else{
-			functionDone = true;
-		}
-	})
-
-	return functionDone
+	const eventdb2 = await Seizures.findOne({'GUID': actualseizure.GUID, 'createdBy': patientId});
+	if(!eventdb2){
+		let eventdb = new Seizures()
+		eventdb.type = actualseizure.type
+		eventdb.duracion = actualseizure.duracion
+		eventdb.disparadores = actualseizure.disparadores
+		eventdb.disparadorEnfermo = actualseizure.disparadorEnfermo
+		eventdb.disparadorOtro = actualseizure.disparadorOtro
+		eventdb.disparadorNotas = actualseizure.disparadorNotas
+		eventdb.descripcion = actualseizure.descripcion
+		eventdb.descripcionRigidez = actualseizure.descripcionRigidez
+		eventdb.descripcionContraccion = actualseizure.descripcionContraccion
+		eventdb.descripcionOtro = actualseizure.descripcionOtro
+		eventdb.descipcionNotas = actualseizure.descipcionNotas
+		eventdb.postCrisis = actualseizure.postCrisis
+		eventdb.postCrisisOtro = actualseizure.postCrisisOtro
+		eventdb.postCrisisNotas = actualseizure.postCrisisNotas
+		eventdb.estadoAnimo = actualseizure.estadoAnimo
+		eventdb.estadoConsciencia = actualseizure.estadoConsciencia
+		eventdb.start = actualseizure.start
+		eventdb.end = actualseizure.end
+		eventdb.title = actualseizure.title
+		eventdb.color = actualseizure.color
+		eventdb.actions = actualseizure.actions
+		eventdb.GUID = actualseizure.GUID
+		eventdb.createdBy = patientId
+		await saveOneSeizure(eventdb)
+	}
+	return true;
 }
 
 async function saveOneSeizure(eventdb){
-	var functionDone2 = false;
-	await eventdb.save((err, eventdbStored) => {
-		if (err) {
-			res.status(500).send({message: `Failed to save in the database: ${err} `})
-		}
-		functionDone2 = true;
-	})
-	return functionDone2;
+	await eventdb.save();
+	return true;
 }
 
 function saveMassiveSeizure2 (req, res){

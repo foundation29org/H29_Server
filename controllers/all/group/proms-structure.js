@@ -148,16 +148,16 @@ async function getInfoProms(listSections, res, groupId, lang, long){
 
 async function getInfoProms2(sectionInfo){
 	var listProms = [];
-	await Prom.find({"section": sectionInfo._id}, {"createdBy" : false }, async function(err, proms) {
+	try {
+		const proms = await Prom.find({"section": sectionInfo._id}, {"createdBy" : false });
 		proms.forEach(function(prom) {
 			if(prom.enabled){
-
 				listProms.push({structure:prom , data:{}})
 			}
-			else{
-			}
 		});
-	});
+	} catch (err) {
+		return [];
+	}
 	return listProms
 }
 

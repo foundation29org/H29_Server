@@ -17,7 +17,11 @@ var options = {
      extName: '.hbs'
  };
 
- var transporter = nodemailer.createTransport(TRANSPORTER_OPTIONS);
+ var transporter = nodemailer.createTransport({
+   ...TRANSPORTER_OPTIONS,
+   disableFileAccess: true,
+   disableUrlAccess: true
+ });
  transporter.use('compile', hbs(options));
 
 function sendMailVerifyEmail (email, randomstring, lang, group){

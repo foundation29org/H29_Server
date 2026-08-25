@@ -98,16 +98,13 @@ async function getInfoProms(listSections, res, patientId){
 	var promsStructure = [];
 	if(listSections.length>0){
 		try {
-			const promises = listSections
-            .filter(section => section.enabled)
-            .map(section => getInfoProms2(section));
-
-			const results = await Promise.all(promises);
+			const enabledSections = listSections.filter(section => section.enabled);
+			const results = await Promise.all(enabledSections.map(section => getInfoProms2(section)));
 
 			promsStructure = results
 				.filter(res0 => res0 !== undefined)
 				.map((res0, index) => {
-					return { section: listSections[index], promsStructure: res0 };
+					return { section: enabledSections[index], promsStructure: res0 };
 				});
 		} catch (error) {
 			
@@ -162,8 +159,8 @@ async function processPromsStructure(promsStructure, patientId) {
 async function getInfoProms3(prom, patientId){
 	var infoProm = [];
 	var metainfo = [];
-	await PatientProm.findOne({createdBy: patientId, "definitionPromId": prom._id}, {"createdBy" : false }).sort({ date : 'desc'}).exec(function(err, patientprom){
-		if (err) infoProm = [];
+	try {
+		const patientprom = await PatientProm.findOne({createdBy: patientId, "definitionPromId": prom._id}, {"createdBy" : false }).sort({ date : 'desc'});
 		if (patientprom){
 			infoProm = patientprom.data;
 			metainfo = patientprom.metainfo;
@@ -182,11 +179,11 @@ async function getInfoProms3(prom, patientId){
 				infoProm = false;
 			}
 		}
+	} catch (err) {
+		infoProm = [];
+	}
 
-	});
-
-	var resp = {infoProm:infoProm, metainfo:metainfo}
-	return resp;
+	return {infoProm:infoProm, metainfo:metainfo};
 }
 
 /**

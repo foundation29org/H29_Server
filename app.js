@@ -5,16 +5,14 @@
 
 const express = require('express')
 const compression = require('compression');
-const bodyParser = require('body-parser');
-const hbs = require('express-handlebars')
+const { engine } = require('express-handlebars')
 const app = express()
 app.use(compression());
 const api = require ('./routes')
 const path = require('path')
 //CORS middleware
-const { appInsights }  = require('./app_Insights')
+const { trackEvent }  = require('./app_Insights')
 const crypt = require('./services/crypt')
-let clientInsights = appInsights.defaultClient;
 
 function setCrossDomain(req, res, next) {
   //instead of * you can define ONLY the sources that we allow.
@@ -24,15 +22,15 @@ function setCrossDomain(req, res, next) {
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   //encrypt for Insights
   var body= crypt.encrypt(JSON.stringify(req.body));
-  clientInsights.trackEvent({name: req.url, properties: {headers: req.headers, body: body}});
+  trackEvent({name: req.url, properties: {headers: req.headers, body: body}});
   next();
 }
 
-app.use(bodyParser.urlencoded({limit: '50mb', extended: false}))
-app.use(bodyParser.json({limit: '50mb'}))
+app.use(express.urlencoded({limit: '50mb', extended: false}))
+app.use(express.json({limit: '50mb'}))
 app.use(setCrossDomain);
 
-app.engine('.hbs', hbs({
+app.engine('.hbs', engine({
 	defaultLayout: 'default',
 	extname: '.hbs'
 }))

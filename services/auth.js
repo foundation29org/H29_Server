@@ -6,8 +6,6 @@ const config = require('../config')
 const crypt = require('./crypt')
 const User = require('../models/user')
 
-
-
 function createToken (user){
 	var id = user._id.toString();
 	var idencrypt= crypt.encrypt(id);
@@ -24,79 +22,48 @@ function createToken (user){
 }
 
 function decodeToken(token, method, roles){
-	const decoded = new Promise(async (resolve, reject) => {
+	return (async () => {
 		try{
 			const payload = jwt.decode(token, config.SECRET_TOKEN)
-			if(roles.includes(payload.role)){
-				let userId= crypt.decrypt(payload.sub);
-				await User.findById(userId, {"__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
-					if(err){
-						reject({
-							status: 403,
-							message: 'Hacker!'
-						})
-					}else{
-						if(user){
-							if(user.role!=payload.role || userId!=user._id || user.subrole!=payload.subrole){
-								reject({
-									status: 403,
-									message: 'Hacker!'
-								})
-							}else{
-								//si es token correcto, mirar sus permisos
-								if(user.role=='Researcher' && method!='GET'){
-									reject({
-										status: 401,
-										message: 'You do not have permissions'
-									})
-								}
-							}
-							//comprobar si el tokenes válido
-							if (payload.exp <= moment().unix()){
-								reject({
-									status: 401,
-									message: 'Token expired'
-								})
-							}
-							//si el token es correcto, obtenemos el sub, que es el código del usuario
-							var subdecrypt= crypt.decrypt(payload.sub.toString());
-							resolve(subdecrypt)
-
-						}else{
-
-							reject({
-								status: 403,
-								message: 'Hacker!'
-							})
-
-						}
-					}
-
-
-				})
-			}else{
-				reject({
-					status: 403,
-					message: 'Access denied.'
-				})
+			if(!roles.includes(payload.role)){
+				const accessErr = new Error('Access denied.')
+				accessErr.status = 403
+				throw accessErr
 			}
-
-
-
+			const userId = crypt.decrypt(payload.sub)
+			const user = await User.findById(userId).select('-__v -confirmationCode -loginAttempts -lastLogin')
+			if(!user){
+				const hackerErr = new Error('Hacker!')
+				hackerErr.status = 403
+				throw hackerErr
+			}
+			if(user.role != payload.role || String(userId) != String(user._id) || user.subrole != payload.subrole){
+				const hackerErr = new Error('Hacker!')
+				hackerErr.status = 403
+				throw hackerErr
+			}
+			if(user.role == 'Researcher' && method != 'GET'){
+				const permErr = new Error('You do not have permissions')
+				permErr.status = 401
+				throw permErr
+			}
+			if (payload.exp <= moment().unix()){
+				const expErr = new Error('Token expired')
+				expErr.status = 401
+				throw expErr
+			}
+			return crypt.decrypt(payload.sub.toString())
 		}catch (err){
-			var messageresult='Invalid Token';
-			if(err.message == "Token expired"){
-				messageresult = err.message;
+			if(err && err.status){
+				throw { status: err.status, message: err.message }
 			}
-			reject({
-				status: 401,
-				message: messageresult
-			})
+			if(err && err.message == 'Token expired'){
+				throw { status: 401, message: 'Token expired' }
+			}
+			console.error('[auth] decodeToken failed:', err && err.message ? err.message : err)
+			throw { status: 401, message: 'Invalid Token' }
 		}
-
-	})
-	return decoded
-
+	})()
 }
 
 module.exports = {
