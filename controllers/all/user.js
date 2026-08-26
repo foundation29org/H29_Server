@@ -108,6 +108,9 @@ function sendcode(req, res) {
 							if(userUpdated){
 								//send email
 								serviceEmail.sendEmailLogin(userUpdated.email, userUpdated.confirmationCode,  userUpdated.group, userUpdated.lang)
+									.catch(function (err) {
+										console.error('[sendcode] email failed:', err && err.message ? err.message : err)
+									})
 								return res.status(200).send({
 									message: 'Check email'
 								})
@@ -533,6 +536,9 @@ function senddeletecode(req, res) {
 							if(userUpdated){
 								//send email
 								serviceEmail.sendEmailDelete(userUpdated.email, userUpdated.confirmationCode,  userUpdated.group, userUpdated.lang)
+									.catch(function (err) {
+										console.error('[sendEmailDelete] email failed:', err && err.message ? err.message : err)
+									})
 								return res.status(200).send({
 									message: 'Check email'
 								})

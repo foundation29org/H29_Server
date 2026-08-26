@@ -1,19 +1,20 @@
 'use strict'
 
+const path = require('path')
 const { TRANSPORTER_OPTIONS, client_server, blobAccessToken } = require('../config')
 const nodemailer = require('nodemailer')
 var hbs = require('nodemailer-express-handlebars')
 const DUCHENNENETHERLANDS = 'Duchenne Parent Project Netherlands'
 const DUCHENNEINTERNATIONAL = 'Duchenne Parent Project International'
 
+const viewsEmail = path.join(__dirname, '..', 'views', 'email')
 var options = {
      viewEngine: {
          extname: '.hbs',
-         layoutsDir: 'views/email/',
-         defaultLayout : 'template',
-         partialsDir : 'views/email/partials/'
+         layoutsDir: viewsEmail,
+         defaultLayout: 'template'
      },
-     viewPath: 'views/email/',
+     viewPath: viewsEmail,
      extName: '.hbs'
  };
 

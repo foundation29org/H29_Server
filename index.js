@@ -7,6 +7,10 @@
 if (typeof globalThis === 'undefined') {
     global.globalThis = global;
 }
+
+process.on('unhandledRejection', (reason) => {
+	console.error('[unhandledRejection]', reason && reason.stack ? reason.stack : reason)
+})
 const mongoose = require('mongoose');
 const app = require('./app')
 const config = require('./config')
