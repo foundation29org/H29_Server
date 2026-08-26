@@ -248,7 +248,7 @@ function getGroup (req, res){
 	let groupName= req.params.groupName;
   //Group.findById(groupName, {"_id" : false }, (err, group) => {
   //Group.find({"name": groupName}, function(err, group) {
-  Group.findOne({ 'name': groupName}, (err, group) => {
+  Group.findOne({ 'name': groupName}).lean().exec((err, group) => {
 		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
 		if(!group) return res.status(202).send({message: `The group does not exist`})
 

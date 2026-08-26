@@ -67,7 +67,7 @@ const crypt = require('../../../services/crypt')
  */
 function getSocialInfo (req, res){
 	let patientId= crypt.decrypt(req.params.patientId);
-	SocialInfo.findOne({"createdBy": patientId}, {"createdBy" : false }, (err, socialInfo) => {
+	SocialInfo.findOne({"createdBy": patientId}).select('-createdBy').lean().exec((err, socialInfo) => {
 		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
 		if(!socialInfo) return res.status(202).send({message: 'There are no social info'})
 		res.status(200).send({socialInfo})
