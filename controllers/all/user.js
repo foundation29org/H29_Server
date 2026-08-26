@@ -2,8 +2,7 @@
 
 'use strict'
 // add the user model
-const { appInsights } = require('../../app_Insights')
-let clientInsights = appInsights.defaultClient;
+const { trackEvent } = require('../../app_Insights')
 const User = require('../../models/user')
 const ClinicalTrial = require('../../models/clinical-trial')
 const Genotype = require('../../models/genotype')
@@ -125,7 +124,7 @@ function sendcode(req, res) {
 		} else {
 			
 			var reasons = User.failedLogin;
-			clientInsights.trackEvent({name: "Login event fail", properties: {reason: Object.keys(reasons)[reason], headers: req.headers, body: req.body}});
+			trackEvent({name: "Login event fail", properties: {reason: Object.keys(reasons)[reason], headers: req.headers, body: req.body}});
 			switch (reason) {
 				case reasons.NOT_FOUND:
 					return res.status(202).send({
@@ -347,7 +346,7 @@ function signIn(req, res){
 		// otherwise we can determine why we failed
 		else {
 			var reasons = User.failedLogin;
-			clientInsights.trackEvent({name: "Login event fail", properties: {reason: Object.keys(reasons)[reason], headers: req.headers, body: req.body}});
+			trackEvent({name: "Login event fail", properties: {reason: Object.keys(reasons)[reason], headers: req.headers, body: req.body}});
 			switch (reason) {
 				case reasons.NOT_FOUND:
 					return res.status(202).send({
@@ -550,7 +549,7 @@ function senddeletecode(req, res) {
 		} else {
 			
 			var reasons = User.failedLogin;
-			clientInsights.trackEvent({name: "Login event fail", properties: {reason: Object.keys(reasons)[reason], headers: req.headers, body: req.body}});
+			trackEvent({name: "Login event fail", properties: {reason: Object.keys(reasons)[reason], headers: req.headers, body: req.body}});
 			switch (reason) {
 				case reasons.NOT_FOUND:
 					return res.status(202).send({

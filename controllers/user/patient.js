@@ -6,7 +6,6 @@
 const Patient = require('../../models/patient')
 const User = require('../../models/user')
 const crypt = require('../../services/crypt')
-const async = require('async')
 const f29azureService = require("../../services/f29azure")
 
 

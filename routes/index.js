@@ -313,6 +313,7 @@ api.post('/useralerts/updateToLaunch/:patientId',auth(roles.OnlyUser), useralert
 //getsastoken
 api.get('/getAzureBlobSasTokenWithContainer/:containerName',auth(roles.AllLessResearcher), f29azureserviceCtrl.getAzureBlobSasTokenWithContainer)
 api.get('/getAzureBlobSasTokenRead/:containerName',auth(roles.All), f29azureserviceCtrl.getAzureBlobSasTokenRead)
+api.get('/listAzureBlobs/:containerName',auth(roles.AllLessResearcher), f29azureserviceCtrl.listBlobs)
 
 //gateway
 api.post('/gateway/search/symptoms/', f29gatewayCtrl.searchSymptoms)

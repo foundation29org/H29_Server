@@ -3,8 +3,38 @@
 const mongoose = require ('mongoose')
 const config = require('./config')
 
-const conndbaccounts = mongoose.createConnection(config.dbaccounts, { useMongoClient: true })
-const conndbdata = mongoose.createConnection(config.dbdata, { useMongoClient: true })
+mongoose.set('strictQuery', false)
+
+// Mongoose 6 still returns a thenable Query when a callback is passed.
+// `await Model.find(..., cb)` therefore executes the query twice and throws
+// "Query was already executed", which crashes Node 24 as an unhandled rejection.
+// Restore Mongoose 4 behavior: the callback owns the query, await is a no-op.
+// If a callback is passed, do all work inside it. Never use results after await:
+//   await Query.exec(function (err, docs) { local = docs })
+//   use(local) // empty — await does not wait. Use: const docs = await Query.exec()
+const originalQueryExec = mongoose.Query.prototype.exec
+mongoose.Query.prototype.exec = function(op, callback) {
+	if (typeof op === 'function' || typeof callback === 'function') {
+		this.$__legacyCallback = true
+	}
+	return originalQueryExec.apply(this, arguments)
+}
+
+const originalQueryThen = mongoose.Query.prototype.then
+mongoose.Query.prototype.then = function(onFulfilled, onRejected) {
+	if (this.$__legacyCallback) {
+		return Promise.resolve().then(onFulfilled, onRejected)
+	}
+	return originalQueryThen.call(this, onFulfilled, onRejected)
+}
+
+const mongoOptions = {
+	tls: true,
+	retryWrites: false
+}
+
+const conndbaccounts = mongoose.createConnection(config.dbaccounts, mongoOptions)
+const conndbdata = mongoose.createConnection(config.dbdata, mongoOptions)
 
 function getConnectionTarget(connectionString) {
 	const parts = connectionString.split('@')
