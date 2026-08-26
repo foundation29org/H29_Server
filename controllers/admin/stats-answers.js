@@ -58,11 +58,11 @@ const crypt = require('../../services/crypt')
  */
 async function getAnswers (req, res){
 	let patientId = crypt.decrypt(req.body.patientId)
-	await Patient.findById(patientId, {"_id" : false , "createdBy" : false }, async function(err, patient){
+	Patient.findById(patientId).select('-_id -createdBy').lean().exec(function(err, patient){
 		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-		if (patient){
-			// check if has type's answer
-			var answer = ''
+		if (!patient) return res.status(404).send({message: 'Patient not found'})
+		// check if has type's answer
+		var answer = ''
 			//var data = false
 			switch(req.body.type){
 				case 'genotype':
@@ -99,29 +99,26 @@ async function getAnswers (req, res){
 					//data = false
 					break;
 			}
-			res.status(200).send({answer})
-		}
+		res.status(200).send({answer})
 	})
 	//res.status(200).send(true)
 }
 
 function getAnswersType(answersArray, type){
-	var result
-	if(answersArray.length > 0){
-		var hasType = false;
-		var i = 0
-		while(i < answersArray.length && hasType == false){
-			if(answersArray[i].type == type){
-				hasType = true
-				result = answersArray[i].answer
-			}
-			i++
-		}
-		if(hasType == false){
-			result = 'not answered'
-		}
+	if (!Array.isArray(answersArray) || answersArray.length === 0) {
+		return 'not answered'
 	}
-	else{
+	var result
+	var hasType = false;
+	var i = 0
+	while(i < answersArray.length && hasType == false){
+		if(answersArray[i] && answersArray[i].type == type){
+			hasType = true
+			result = answersArray[i].answer
+		}
+		i++
+	}
+	if(hasType == false){
 		result = 'not answered'
 	}
 	return result
@@ -171,296 +168,32 @@ function getAnswersType(answersArray, type){
 function setAnswers (req, res){
 	let patientId = crypt.decrypt(req.body.patientId)
 
-	Patient.findById(patientId, {"_id" : false , "createdBy" : false }, (err, patient) => {
+	Patient.findById(patientId).select('-createdBy').lean().exec((err, patient) => {
 		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-		if (patient){
-			let newPatient = patient
-			// check if has type's answer and change or add value
-			switch(req.body.type){
-				case 'genotype':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'genotype'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'genotypeFiles':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'genotypeFiles'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'clinicaltrials':
-						if(newPatient.answers.length != 0){
-							var hasType = false;
-							for(var i = 0; i<newPatient.answers.length; i++){
-								if(newPatient.answers[i].type == 'clinicaltrials'){
-									newPatient.answers[i].answer = req.body.answer
-									hasType = true
-								}
-							}
-							if(hasType == false){
-								newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-							}
-						}
-						else{
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					break;
-				case 'drugs':
-						if(newPatient.answers.length != 0){
-							var hasType = false;
-							for(var i = 0; i<newPatient.answers.length; i++){
-								if(newPatient.answers[i].type == 'drugs'){
-									newPatient.answers[i].answer = req.body.answer
-									hasType = true
-								}
-							}
-							if(hasType == false){
-								newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-							}
-						}
-						else{
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					break;
-				case 'otherDrugs':
-						if(newPatient.answers.length != 0){
-							var hasType = false;
-							for(var i = 0; i<newPatient.answers.length; i++){
-								if(newPatient.answers[i].type == 'otherDrugs'){
-									newPatient.answers[i].answer = req.body.answer
-									hasType = true
-								}
-							}
-							if(hasType == false){
-								newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-							}
-						}
-						else{
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					break;
-				case 'vaccinations':
-						if(newPatient.answers.length != 0){
-							var hasType = false;
-							for(var i = 0; i<newPatient.answers.length; i++){
-								if(newPatient.answers[i].type == 'vaccinations'){
-									newPatient.answers[i].answer = req.body.answer
-									hasType = true
-								}
-							}
-							if(hasType == false){
-								newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-							}
-						}
-						else{
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					break;
-				case 'specificVisit':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-
-							if(newPatient.answers[i].type == 'specificVisit'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'hospitalization':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'hospitalization'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'emergencies':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'emergencies'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'cardiotest':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'cardiotest'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'respiratorytests':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'respiratorytests'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'bonehealthtest':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'bonehealthtest'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'bloodtest':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'bloodtest'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'surgery':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'surgery'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				case 'medicalCare':
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == 'medicalCare'){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-				default:
-					if(newPatient.answers.length != 0){
-						var hasType = false;
-						for(var i = 0; i<newPatient.answers.length; i++){
-							if(newPatient.answers[i].type == req.body.type){
-								newPatient.answers[i].answer = req.body.answer
-								hasType = true
-							}
-						}
-						if(hasType == false){
-							newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-						}
-					}
-					else{
-						newPatient.answers.push({type:req.body.type, answer: req.body.answer})
-					}
-					break;
-			}
-			// update new patient
-			Patient.findByIdAndUpdate(patientId, newPatient, {"createdBy" : false }, (err, patientUpdated) => {
-				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-				if (patientUpdated){
-					res.status(200).send({message: 'Answer updated'})
+		if (!patient) return res.status(404).send({message: 'Patient not found'})
+		try {
+			var answers = Array.isArray(patient.answers) ? patient.answers.slice() : []
+			var hasType = false
+			for (var i = 0; i < answers.length; i++) {
+				if (answers[i] && answers[i].type == req.body.type) {
+					answers[i].answer = req.body.answer
+					hasType = true
 				}
+			}
+			if (!hasType) {
+				answers.push({type: req.body.type, answer: req.body.answer})
+			}
+			Patient.updateOne({ _id: patientId }, { $set: { answers: answers } }).exec((err, result) => {
+				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+				if (!result || (result.matchedCount === 0 && result.n === 0)) {
+					return res.status(404).send({message: 'Patient not found'})
+				}
+				res.status(200).send({message: 'Answer updated'})
 			})
+		} catch (e) {
+			return res.status(500).send({message: `Error making the request: ${e}`})
 		}
 	})
-
 }
 
 module.exports = {

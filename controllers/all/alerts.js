@@ -1366,47 +1366,33 @@ function getUserAlertsNotReadForPatientIdAndLang(req,res){
     var date=new Date();
     var listAlertsNotRead = [];
 
-    Useralerts.find({patientId:patientId,state:"Not read"},async function(err,userAlertsFound){
+    Useralerts.find({patientId:patientId,state:"Not read"}).lean().exec(async function(err,userAlertsFound){
         if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-        if(userAlertsFound){
-            for(var i=0;i<userAlertsFound.length;i++){
-                if(Date.parse(userAlertsFound[i].showDate)<=Date.parse(date)){
-                    await Alerts.findById(userAlertsFound[i].alertId,(err,alertFound)=>{
-                        if (err) return res.status(500).send({message: `Error making the request: ${err}`})
-                        if(alertFound){
-                            // Comprobar si tiene endDate configurado
-                            if((alertFound.endDate!=null)&&(alertFound.endDate!=undefined)&&(alertFound.endDate!="")&&(alertFound.endDate!=[])){
-                                if(Date.parse(alertFound.endDate)>=Date.parse(date)){
-                                    // Compruebo el idioma
-                                    for(var j=0;j<alertFound.translatedName.length;j++){
-                                        if(alertFound.translatedName[j].code==lang){
-                                            if(alertFound.translatedName[j].title != ""){
-                                                listAlertsNotRead.unshift(alertFound);
-                                            }
-                                        }
-                                    }
-
-                                }
-                            }
-                            // Si no tiene endDate configurado
-                            else{
-                                // Compruebo el idioma
-                                for(var j=0;j<alertFound.translatedName.length;j++){
-                                    if(alertFound.translatedName[j].code==lang){
-                                        if(alertFound.translatedName[j].title != ""){
-                                            listAlertsNotRead.unshift(alertFound);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    })
+        try {
+            const alerts = userAlertsFound || []
+            const dateMs = Date.parse(date)
+            for (var i = 0; i < alerts.length; i++) {
+                if (Date.parse(alerts[i].showDate) > dateMs) {
+                    continue
+                }
+                const alertFound = await Alerts.findById(alerts[i].alertId).lean()
+                if (!alertFound) {
+                    continue
+                }
+                const names = Array.isArray(alertFound.translatedName) ? alertFound.translatedName : []
+                const hasEnd = alertFound.endDate != null && alertFound.endDate !== ''
+                if (hasEnd && Date.parse(alertFound.endDate) < dateMs) {
+                    continue
+                }
+                for (var j = 0; j < names.length; j++) {
+                    if (names[j] && names[j].code == lang && names[j].title != '') {
+                        listAlertsNotRead.unshift(alertFound)
+                    }
                 }
             }
-            return res.status(200).send(listAlertsNotRead);
-        }
-        else{
-            return res.status(200).send(listAlertsNotRead);
+            return res.status(200).send(listAlertsNotRead)
+        } catch (e) {
+            return res.status(500).send({message: `Error making the request: ${e}`})
         }
     })
 

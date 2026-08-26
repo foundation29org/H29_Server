@@ -52,31 +52,22 @@ const f29azureService = require("../../services/f29azure")
 function getPatientsUser (req, res){
 	let userId= crypt.decrypt(req.params.userId);
 
-
-	User.findById(userId, {"_id" : false , "__v" : false, "confirmationCode" : false, "loginAttempts" : false, "lastLogin" : false}, (err, user) => {
+	User.findById(userId).select('_id').lean().exec((err, user) => {
 		if (err) return res.status(500).send({message: 'Error making the request:'})
 		if(!user) return res.status(404).send({code: 208, message: 'The user does not exist'})
 
-		Patient.find({"createdBy": userId},(err, patients) => {
-			User.populate(patients, {path: "createdBy"},function(err, patients){
-				if (err) return res.status(500).send({message: `Error making the request: ${err}`})
+		Patient.find({"createdBy": userId}).select('patientName surname').lean().exec((err, patients) => {
+			if (err) return res.status(500).send({message: `Error making the request: ${err}`})
 
-				var listpatients = [];
-
-				patients.forEach(function(u) {
-					var id = u._id.toString();
-					var idencrypt= crypt.encrypt(id);
-					listpatients.push({sub:idencrypt, patientName: u.patientName, surname: u.surname});
-				});
-
-				//res.status(200).send({patient, patient})
-				// if the two objects are the same, the previous line can be set as follows
-				res.status(200).send({listpatients})
+			var listpatients = (patients || []).map(function(u) {
+				var id = u._id.toString();
+				var idencrypt= crypt.encrypt(id);
+				return {sub:idencrypt, patientName: u.patientName, surname: u.surname};
 			});
+
+			res.status(200).send({listpatients})
 		})
 	})
-
-
 }
 
 /**
@@ -142,7 +133,7 @@ function getPatientsUser (req, res){
 function getPatient (req, res){
 	let patientId= crypt.decrypt(req.params.patientId);
 
-	Patient.findById(patientId, {"_id" : false , "createdBy" : false }, (err, patient) => {
+	Patient.findById(patientId).select('-_id -createdBy').lean().exec((err, patient) => {
 		if (err) return res.status(500).send({message: `Error making the request: ${err}`})
 		if(!patient) return res.status(202).send({message: `The patient does not exist`})
 

@@ -28,6 +28,23 @@ mongoose.Query.prototype.then = function(onFulfilled, onRejected) {
 	return originalQueryThen.call(this, onFulfilled, onRejected)
 }
 
+// Mongoose 6 cloneArray throws when a document field is typed as Array
+// but stored as undefined (typical in old Cosmos docs). Express then 500s
+// on res.send(doc). Fall back to the raw BSON so those reads still return.
+const originalToObject = mongoose.Document.prototype.$toObject
+mongoose.Document.prototype.$toObject = function(options, json) {
+	try {
+		return originalToObject.call(this, options, json)
+	} catch (err) {
+		console.log('[mongo] $toObject fallback:', err && err.message ? err.message : err)
+		try {
+			return JSON.parse(JSON.stringify(this._doc || {}))
+		} catch (err2) {
+			return {}
+		}
+	}
+}
+
 const mongoOptions = {
 	tls: true,
 	retryWrites: false
